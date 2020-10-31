@@ -32,7 +32,7 @@ public with sharing class ApexTriggerAnalyzer {
     private static ApexTriggerAnalyzerResults checkTriggersForDuplicateEvents(String objectName, List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result) {
         List<String> eventNames = new List<String>{'UsageBeforeInsert','UsageBeforeUpdate','UsageBeforeDelete','UsageAfterInsert','UsageAfterUpdate','UsageAfterUndelete','UsageAfterDelete','UsageIsBulk'};
         
-        //Add objectName to AnalyzerResult
+        //Add objectName to ApexTriggerAnalyzerResults
         result.objectName = objectName;
 
         for(String eventName: eventNames) {
