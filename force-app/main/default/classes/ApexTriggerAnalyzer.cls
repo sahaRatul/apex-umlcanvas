@@ -15,7 +15,7 @@ public with sharing class ApexTriggerAnalyzer {
 
         //Separate Active, Inactive, Deleted, Managed and Invalid triggers
         result = ApexTriggerAnalyzer.classifyTriggers(apexTriggers, result);
-        
+
         return result;
     }
 
@@ -31,12 +31,12 @@ public with sharing class ApexTriggerAnalyzer {
 
     private static ApexTriggerAnalyzerResults checkTriggersForDuplicateEvents(String objectName, List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result) {
         List<String> eventNames = new List<String>{'UsageBeforeInsert','UsageBeforeUpdate','UsageBeforeDelete','UsageAfterInsert','UsageAfterUpdate','UsageAfterUndelete','UsageAfterDelete','UsageIsBulk'};
-        
-        //Add objectName to ApexTriggerAnalyzerResults
+
+        //Add objectName to AnalyzerResult
         result.objectName = objectName;
 
         for(String eventName: eventNames) {
-            ApexTriggerAnalyzerResults.EventDuplicates duplicates = new ApexTriggerAnalyzerResults.EventDuplicates();
+            ApexTriggerAnalyzerResults.EventDuplicate duplicates = new ApexTriggerAnalyzerResults.EventDuplicate();
             //Check for duplicates
             for(ApexTrigger apexTrigger: apexTriggers) {
                 duplicates.eventName = eventName.remove('Usage');
@@ -48,7 +48,7 @@ public with sharing class ApexTriggerAnalyzer {
                 result.eventDuplicates.add(duplicates);
             }
         }
-        
+
         return result;
     }
 
@@ -57,7 +57,7 @@ public with sharing class ApexTriggerAnalyzer {
             switch on apexTrigger.Status {
                 when 'Active' {
                     result.activeTriggers.add(apexTrigger.Name);
-                }	
+                }
                 when 'Inactive' {
                     result.inactiveTriggers.add(apexTrigger.Name);
                 }
@@ -73,6 +73,13 @@ public with sharing class ApexTriggerAnalyzer {
             if(!apexTrigger.IsValid) {
                 result.invalidTriggers.add(apexTrigger.Name);
             }
+        }
+        return result;
+    }
+
+    private static ApexTriggerAnalyzerResults findDmlInsideLoops(List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result) {
+        for(ApexTrigger apexTrigger : apexTriggers) {
+            
         }
         return result;
     }
