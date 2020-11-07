@@ -24,7 +24,7 @@ public with sharing class ApexTriggerAnalyzerResults {
     public List<EventDuplicate> eventDuplicates {get;set;}
     @AuraEnabled
     public List<LoopDML> loopDmls {get;set;}
-
+ 
     public class EventDuplicate {
         public EventDuplicate() {
             this.presentInTriggers = new List<String>();
@@ -33,6 +33,8 @@ public with sharing class ApexTriggerAnalyzerResults {
         public String eventName{get;set;}
         @AuraEnabled
         public List<String> presentInTriggers{get;set;}
+         @AuraEnabled
+        public String objectName {get;set;}
     }
 
     public class LoopDML {
@@ -43,5 +45,29 @@ public with sharing class ApexTriggerAnalyzerResults {
         public String loopType {get;set;}
         @AuraEnabled
         public Map<Integer, String> dmlStatements{get;set;}
+    }
+      
+   public class PDFWrapper 
+    {
+        @AuraEnabled
+        public String eventName{get;set;}
+        @AuraEnabled
+        public List<String> presentInTriggers{get;set;}
+        @AuraEnabled
+        public String objName{get;set;}
+        @AuraEnabled
+        public String loopType {get;set;}
+        @AuraEnabled
+        public Map<Integer, String> dmlStatements{get;set;}
+    }
+    
+    @AuraEnabled
+    public static PDFWrapper GetPDFData(){
+        PDFWrapper pwrapper =  new PDFWrapper();
+        EventDuplicate ED = new EventDuplicate();
+        pwrapper.objName = ED.objectName;
+        pwrapper.eventName= ED.eventName;
+        pwrapper.presentInTriggers=ED.presentInTriggers;
+        return pwrapper;
     }
 }
