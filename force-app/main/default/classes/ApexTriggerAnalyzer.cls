@@ -99,7 +99,6 @@ public with sharing class ApexTriggerAnalyzer {
     }
     
     private static ApexTriggerAnalyzerResults checkTriggersForHardCodedIDs(List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result){
-        
         Map<String, String> triggerNamesWithBodyWithoutComments = new Map<String, String>();
         Map<String, String> mapOfObjNameAndPrefix = new Map<String,String>();
         List<String> idsPerTrigger = new List<String>();
@@ -118,7 +117,6 @@ public with sharing class ApexTriggerAnalyzer {
             }
         }
         
-        
       //removing hardcoded ids logic
         for(String trigName : triggerNamesWithBodyWithoutComments.keySet()){
             String triggerBody = triggerNamesWithBodyWithoutComments.get(trigName);
@@ -136,17 +134,13 @@ public with sharing class ApexTriggerAnalyzer {
                             if(CheckValidSalesforceIDUtility.isValidSalesforceId(finalId, typ)){
                                 triggerBody = triggerBody.remove(finalId);
                                 idsPerTrigger.add(finalId);
-                                
                             }
                         }
                     }
                     if(idsPerTrigger.size() !=0){
-                        
                         hardCodedIdsresultWithBodyMap.put(triggerBody , idsPerTrigger);
                         //To get line numbers of IDs
                        //idsPerTriggerWithLineNumbers =  ApexTriggerAnalyzerUtils.getLineNumberOfTrigger(hardCodedIdsresultWithBodyMap);
-                       
-                        
                         hardCodedIdsresult.put(trigName , idsPerTrigger);
                         result.hardCodedIdObjects = hardCodedIdsresult;
                     }else{
@@ -154,12 +148,7 @@ public with sharing class ApexTriggerAnalyzer {
                     }
                 }
             }
-            
-            
-            
         }
-        
-        
         system.debug('final hardcoded Ids in a trigger==> '+result.hardCodedIdObjects);
         system.debug('final hardcoded Ids in a trigger==> '+idsPerTriggerWithLineNumbers);
         return result;
