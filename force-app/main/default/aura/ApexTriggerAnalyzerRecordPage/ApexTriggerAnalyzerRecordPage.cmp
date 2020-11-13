@@ -1,3 +1,176 @@
-<aura:component>
+<aura:component
+    implements="forceCommunity:availableForAllPageTypes,force:appHostable,force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+    access="global" controller="ApexTriggerAnalyzer">
 
-</aura:component>	
+    <!--ATTRIBUTES-->
+    <aura:attribute name="triggerAnalyzerReport" type="List" default="[]" />
+    <aura:attribute name="selectedObject" type="Map" default="{}" />
+
+    <!--HANDLERS-->
+    <aura:handler name="init" value="{!this}" action="{!c.init}" />
+
+    <div class="slds-box slds-theme_default" style="height:70vh">
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_2-of-12">
+                <ul class="slds-has-dividers_bottom-space">
+                    <aura:iteration items="{!v.triggerAnalyzerReport}" var="item">
+                        <li data-value="{!item.objectApiName}" onclick="{!c.objectNameClickHandler}" class="slds-item"
+                            style="cursor:pointer">{!item.objectName}</li>
+                    </aura:iteration>
+                </ul>
+            </div>
+            <div class="slds-col slds-size_10-of-12">
+                <h1 class="slds-page-header__title">Viewing Trigger Details for {!v.selectedObject.objectName} object
+                </h1>
+                <lightning:tabset>
+                    <lightning:tab label="Object's Trigger Details">
+                        <div class="slds-text-title_caps">Active Triggers</div>
+                        <ul class="slds-list_dotted">
+                            <aura:iteration items="{!v.selectedObject.triggerDetails.activeTriggers}" var="item">
+                                <li>{!item}</li>
+                            </aura:iteration>
+                        </ul>
+                        <div class="slds-text-title_caps">Inactive Triggers</div>
+                        <ul class="slds-list_dotted">
+                            <aura:iteration items="{!v.selectedObject.triggerDetails.inactiveTriggers}" var="item">
+                                <li>{!item}</li>
+                            </aura:iteration>
+                        </ul>
+                        <div class="slds-text-title_caps">Invalid Triggers</div>
+                        <ul class="slds-list_dotted">
+                            <aura:iteration items="{!v.selectedObject.triggerDetails.invalidTriggers}" var="item">
+                                <li>{!item}</li>
+                            </aura:iteration>
+                        </ul>
+                        <div class="slds-text-title_caps">Deleted Triggers</div>
+                        <ul class="slds-list_dotted">
+                            <aura:iteration items="{!v.selectedObject.triggerDetails.deletedTriggers}" var="item">
+                                <li>{!item}</li>
+                            </aura:iteration>
+                        </ul>
+                        <div class="slds-text-title_caps">Managed Triggers</div>
+                        <ul class="slds-list_dotted">
+                            <aura:iteration items="{!v.selectedObject.triggerDetails.managedTriggers}" var="item">
+                                <li>{!item}</li>
+                            </aura:iteration>
+                        </ul>
+                    </lightning:tab>
+                    <lightning:tab label="Duplicate Events">
+                        <ul>
+                            <aura:iteration items="{!v.selectedObject.duplicatedEvents}" var="item">
+                                <li class="slds-text-title_caps">{!item.eventName}</li>
+                                <ul class="slds-list_dotted">
+                                    <aura:iteration items="{!item.triggerName}" var="triggerName">
+                                        <li>{!triggerName}</li>
+                                    </aura:iteration>
+                                </ul>
+                            </aura:iteration>
+                        </ul>
+                    </lightning:tab>
+                    <lightning:tab label="HardCoded Ids">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate" title="Hardcoded Id">Hardcoded Id</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate" title="Present in Trigger">Present in Trigger</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate" title="Line Number">Line Number</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <aura:iteration items="{!v.selectedObject.hardcodedIds}" var="item">
+                                    <tr class="slds-hint-parent">
+                                        <td data-label="Hardcoded Id">
+                                            <div class="slds-truncate" title="{!item.id}">{!item.id}</div>
+                                        </td>
+                                        <td data-label="Present in Trigger">
+                                            <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}
+                                            </div>
+                                        </td>
+                                        <td data-label="Line Number">
+                                            <div class="slds-truncate" title="{!item.lineNumber}">{!item.lineNumber}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </aura:iteration>
+                            </tbody>
+                        </table>
+                    </lightning:tab>
+                    <lightning:tab label="Loop DMLs/Queries">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate" title="Statement">Statement</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate" title="Present in Trigger">Present in Trigger</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate" title="Line Number">Line Number</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <aura:iteration items="{!v.selectedObject.loopDMLs}" var="item">
+                                    <tr class="slds-hint-parent">
+                                        <td data-label="Statement">
+                                            <div class="slds-truncate" title="{!item.statement}">{!item.statement}</div>
+                                        </td>
+                                        <td data-label="Present in Trigger">
+                                            <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}
+                                            </div>
+                                        </td>
+                                        <td data-label="Line Number">
+                                            <div class="slds-truncate" title="{!item.lineNumber}">{!item.lineNumber}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </aura:iteration>
+                            </tbody>
+                        </table>
+                    </lightning:tab>
+                    <lightning:tab label="Queries without clause">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate" title="Statement">Statement</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate" title="Present in Trigger">Present in Trigger</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate" title="Line Number">Line Number</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <aura:iteration items="{!v.selectedObject.queriesWithoutClause}" var="item">
+                                    <tr class="slds-hint-parent">
+                                        <td data-label="Statement">
+                                            <div class="slds-truncate" title="{!item.statement}">{!item.statement}</div>
+                                        </td>
+                                        <td data-label="Present in Trigger">
+                                            <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}
+                                            </div>
+                                        </td>
+                                        <td data-label="Line Number">
+                                            <div class="slds-truncate" title="{!item.lineNumber}">{!item.lineNumber}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </aura:iteration>
+                            </tbody>
+                        </table>
+                    </lightning:tab>
+                </lightning:tabset>
+            </div>
+        </div>
+    </div>
+</aura:component>
