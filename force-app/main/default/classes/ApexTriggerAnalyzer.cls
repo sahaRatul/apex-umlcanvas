@@ -19,6 +19,9 @@ public with sharing class ApexTriggerAnalyzer {
         //Check for Loops
         result = ApexTriggerAnalyzer.findDmlInsideLoops(apexTriggers, result);
         
+        //check hardcoded ids in a trigger
+        result = checkTriggersForHardCodedIDs(apexTriggers, result);
+        
         return result;
     }
     
@@ -94,4 +97,73 @@ public with sharing class ApexTriggerAnalyzer {
         }
         return result;
     }
+    
+    private static ApexTriggerAnalyzerResults checkTriggersForHardCodedIDs(List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result){
+        
+        Map<String, String> triggerNamesWithBodyWithoutComments = new Map<String, String>();
+        Map<String, String> mapOfObjNameAndPrefix = new Map<String,String>();
+        List<String> idsPerTrigger = new List<String>();
+        Map<String, List<Integer>> idsPerTriggerWithLineNumbers = new Map<String, List<Integer>>();
+        Map<String, List<String>> hardCodedIdsresult = new Map<String, List<String>>();
+        Map<String, List<String>> hardCodedIdsresultWithBodyMap = new Map<String, List<String>>();
+        triggerNamesWithBodyWithoutComments = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers);
+        
+         for ( Schema.SObjectType obj : Schema.getGlobalDescribe().values() )
+        {
+            Schema.DescribeSObjectResult objResult = obj.getDescribe();
+            String objName = objResult.getName();
+            String objPrefix = objResult.getKeyPrefix();
+            if(objPrefix != null){
+            mapOfObjNameAndPrefix.put(objPrefix, objName);
+            }
+        }
+        
+        
+      //removing hardcoded ids logic
+        for(String trigName : triggerNamesWithBodyWithoutComments.keySet()){
+            String triggerBody = triggerNamesWithBodyWithoutComments.get(trigName);
+            
+            for(String prefix : mapOfObjNameAndPrefix.keySet()){
+                
+                if(triggerBody.contains(prefix)){
+                    system.debug('CountMatches'+prefix+triggerBody.countMatches(prefix));
+                    Integer countOfIds = triggerBody.countMatches(prefix);
+                    for(Integer i = 0; i< countOfIds; i++){
+                        String finalId = prefix+triggerBody.substringBetween(prefix,'\'');
+                        system.debug('Final Ids===>' +finalId);
+                        if(finalId.length() == 15 || finalId.length() == 18){
+                            Type typ = Type.forName(mapOfObjNameAndPrefix.get(prefix));
+                            if(CheckValidSalesforceIDUtility.isValidSalesforceId(finalId, typ)){
+                                triggerBody = triggerBody.remove(finalId);
+                                idsPerTrigger.add(finalId);
+                                
+                            }
+                        }
+                    }
+                    if(idsPerTrigger.size() !=0){
+                        
+                        hardCodedIdsresultWithBodyMap.put(triggerBody , idsPerTrigger);
+                        //To get line numbers of IDs
+                       //idsPerTriggerWithLineNumbers =  ApexTriggerAnalyzerUtils.getLineNumberOfTrigger(hardCodedIdsresultWithBodyMap);
+                       
+                        
+                        hardCodedIdsresult.put(trigName , idsPerTrigger);
+                        result.hardCodedIdObjects = hardCodedIdsresult;
+                    }else{
+                        //set a flag 
+                    }
+                }
+            }
+            
+            
+            
+        }
+        
+        
+        system.debug('final hardcoded Ids in a trigger==> '+result.hardCodedIdObjects);
+        system.debug('final hardcoded Ids in a trigger==> '+idsPerTriggerWithLineNumbers);
+        return result;
+    }
+    
+     
 }

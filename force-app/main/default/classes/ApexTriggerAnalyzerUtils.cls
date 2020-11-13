@@ -6,13 +6,9 @@ public with sharing class ApexTriggerAnalyzerUtils {
     public static String removeCommentsFromCode(String code) {
         Integer n = code.length(); 
         String result = ''; 
-  
-        // Flags to indicate that single line and multpile line comments 
-        // have started or not. 
         Boolean singleLineComment = false; 
         Boolean multiLineComment = false; 
 
-        // Traverse the given program 
         for (Integer i = 0; i < n; i++) 
         { 
             // If single line comment flag is on, then check for end of it 
@@ -21,7 +17,7 @@ public with sharing class ApexTriggerAnalyzerUtils {
             }
 
             // If multiple line comment is on, then check for end of it 
-            else if  (multiLineComment == true && code.subString(i, i + 2)== '*/') {
+            else if  (multiLineComment == true && code.subString(i, i + 2) == '*/') {
                 multiLineComment = false;
                 i++;
                 if(i >= n)
@@ -105,5 +101,95 @@ public with sharing class ApexTriggerAnalyzerUtils {
             }
         }
         return loopBodies;
+    }
+    
+    public static Map<String, String> removeCommentedCodeFromTrigger(List<ApexTrigger> apexTriggers){
+        String triggerbody;
+        Map<String, String> triggerNamesWithBody = new Map<String, String>();
+        
+        if(apexTriggers != null || !apexTriggers.isEmpty()){
+            for(ApexTrigger trig : apexTriggers){
+                if(trig.body == '(hidden)'){
+                    triggerNamesWithBody.put(trig.Name , 'Managed Package');
+                    
+                }else{
+                    triggerbody =  trig.body;
+                    List<String> lengthOfBody = triggerBody.split('\n');
+                    system.debug('Apex Triggers****'+triggerbody);
+                    system.debug('Apex Triggers****'+lengthOfBody.size());
+                    //Multi Line Comment
+                    if(triggerbody.contains('/*')){
+                        Integer count = triggerbody.countMatches('/*');
+                        for(Integer i = 0; i < count; i++){
+                            String removedpart = triggerbody.substringBetween('/*', '*/');
+                            triggerbody = triggerbody.remove('/*'+removedpart+'*/');
+                            
+                        }
+                        
+                    }
+                    
+                    //Single Line Comment
+                    if(triggerbody.contains('//')){
+                        Integer count2 = triggerbody.countMatches('//');
+                        for(Integer i = 0; i < count2; i++){
+                            String removedpart = triggerbody.substringBetween('//', '\n');
+                            triggerbody = triggerbody.remove('//'+removedpart);
+                            
+                        }
+                        
+                    }  
+                    
+                    if(triggerbody != null || triggerbody != ''){
+                        triggerNamesWithBody.put(trig.Name , triggerbody); 
+                    }
+                }
+            } 
+            
+        }
+        return triggerNamesWithBody;
+    }
+    
+    public static Map<String, String> getBodyFromTrigger(List<ApexTrigger> apexTriggers){
+        String triggerbody;
+        Map<String, String> triggerNamesWithBody = new Map<String, String>();
+        
+        if(apexTriggers != null || !apexTriggers.isEmpty()){
+            for(ApexTrigger trig : apexTriggers){
+                if(trig.body == '(hidden)'){
+                    //do something
+                    
+                }else{
+                    triggerbody =  trig.body;
+                  
+                    if(triggerbody != null || triggerbody != ''){
+                        triggerNamesWithBody.put(trig.Name , triggerbody); 
+                    }
+                }
+            } 
+        }
+        return triggerNamesWithBody;
+    }
+    
+    public static Map<String, List<Integer>> getLineNumberOfTrigger(Map<String , List<String>> trigerBodyIdsMap, List<ApexTrigger> apexTriggers){
+        Map<String, List<Integer>> idsWithLineNumbers = new Map<String, List<Integer>>();
+        List<Integer> lineNumbersList = new List<Integer>();
+        for(String body : trigerBodyIdsMap.keySet()){
+            List<String> splitByLine = new List<String>();
+            splitByLine = body.split('\n');
+            system.debug('splitByLine'+splitByLine);
+            system.debug('splitByLine'+splitByLine.size());
+            for(Integer i = 0; i < trigerBodyIdsMap.get(body).size(); i++){
+                Integer linenumber;
+                for(String line : splitByLine){
+                    
+                    if(line.contains(trigerBodyIdsMap.get(body)[i])){
+                        linenumber = splitByLine.indexOf(line);
+                        lineNumbersList.add(linenumber);
+                    }
+                }
+                idsWithLineNumbers.put(trigerBodyIdsMap.get(body)[i], lineNumbersList);
+            }
+        }
+        return idsWithLineNumbers;
     }
 }
