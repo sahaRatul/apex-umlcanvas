@@ -3,7 +3,7 @@ public with sharing class ApexTriggerAnalyzerUtils {
 
     }
 
-    public static Map<String, String> removeCommentedCodeFromTrigger(List<ApexTrigger> apexTriggers, Boolean replaceMultiCommentsWithSpace){
+    public static Map<String, String> removeCommentedCodeFromTrigger(List<ApexTrigger> apexTriggers, Boolean preserveNewLines){
         String triggerbody;
         Map<String, String> triggerNamesWithBody = new Map<String, String>();
         
@@ -11,7 +11,7 @@ public with sharing class ApexTriggerAnalyzerUtils {
             for(ApexTrigger trig : apexTriggers){
                 if(trig.body == '(hidden)'){
                     triggerNamesWithBody.put(trig.Name , 'Managed Package');
-                }else{
+                } else{
                     triggerbody =  trig.body;
                     List<String> lengthOfBody = triggerBody.split('\n');
 
@@ -20,7 +20,7 @@ public with sharing class ApexTriggerAnalyzerUtils {
                         Integer count = triggerbody.countMatches('/*');
                         for(Integer i = 0; i < count; i++){
                             String removedpart = triggerbody.substringBetween('/*', '*/');
-                            if(replaceMultiCommentsWithSpace) {
+                            if(preserveNewLines) {
                                 //Generate blank string
                                 String blankReplacementString = '';
                                 for(Integer j = 0; j < removedpart.length(); j++) {
@@ -132,7 +132,9 @@ public with sharing class ApexTriggerAnalyzerUtils {
                 }
 
                 if(!returnMap.containsKey(lineNumber)) {
-                    statement = statement.replaceAll(']', '');
+                    if(!statement.toUpperCase().contains('DATABASE')) {
+                        statement = statement.replaceAll(']', '');
+                    }
                     statement = statement.replaceAll('\n', ' ');
                     returnMap.put(lineNumber, statement);
                 }
