@@ -48,7 +48,9 @@ public with sharing class ApexTriggerAnalyzer {
         insert report;
 
         String jsonReport = ApexTriggerAnalyzerUtils.getJsonReport(results);
-        ApexFileUpload.uploadFile(jsonReport, 'reeport.json', report.id);
+        ApexFileUpload.uploadFile(jsonReport, 'report.json', report.id);
+
+        System.debug('report Id ===> ' + report.id);
 
         return report.id;
     }
@@ -178,9 +180,6 @@ public with sharing class ApexTriggerAnalyzer {
                 }
             }
         }
-        
-        system.debug('final hardcoded Ids in a trigger==> '+result.hardCodedIdObjects);
-        system.debug('final hardcoded Ids in a trigger==> '+idsPerTriggerWithLineNumbers);
         return result;
     }
     

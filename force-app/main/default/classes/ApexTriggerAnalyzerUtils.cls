@@ -181,28 +181,93 @@ public with sharing class ApexTriggerAnalyzerUtils {
                     if(line.contains(trigerBodyIdsMap.get(body)[i])){
                         linenumber = splitByLine.indexOf(line);
                         lineNumbersList.add(linenumber);
-                        
                     }
-                
                 }
                 
                 idsWithLineNumbers.put(trigerBodyIdsMap.get(body)[i], lineNumbersList);
             }
-            
         }
         return idsWithLineNumbers;
-    }
-
-    public static void getLineCount(String body) {
-        List<String> splitByLine = new List<String>();
-        splitByLine = body.split('\n');
-        //system.debug('splitByLine'+splitByLine);
-        system.debug('splitByLine: '+ splitByLine.size());
     }
 
     public static String getJsonReport(List<ApexTriggerAnalyzerResults> results) {
         JSONGenerator gen = JSON.createGenerator(true);
         gen.writeStartArray();
+        for(ApexTriggerAnalyzerResults result: results) {
+            gen.writeStartObject();
+            gen.writeStringField('objectName', result.objectName);
+            gen.writeStringField('objectApiName', result.objectName);
+
+            //Basic trigger information tab data starts here
+            gen.writeFieldName('triggerDetails');
+            gen.writeStartObject();
+            gen.writeFieldName('activeTriggers');
+            gen.writeStartArray();
+            for(String trg: result.activeTriggers) {
+                gen.writeString(trg);
+            }
+            gen.writeEndArray();
+            gen.writeFieldName('inactiveTriggers');
+            gen.writeStartArray();
+            for(String trg: result.inactiveTriggers) {
+                gen.writeString(trg);
+            }
+            gen.writeEndArray();
+            gen.writeFieldName('invalidTriggers');
+            gen.writeStartArray();
+            for(String trg: result.invalidTriggers) {
+                gen.writeString(trg);
+            }
+            gen.writeEndArray();
+            gen.writeFieldName('deletedTriggers');
+            gen.writeStartArray();
+            for(String trg: result.deletedTriggers) {
+                gen.writeString(trg);
+            }
+            gen.writeEndArray();
+            gen.writeFieldName('managedTriggers');
+            gen.writeStartArray();
+            for(String trg: result.managedTriggers) {
+                gen.writeString(trg);
+            }
+            gen.writeEndArray();
+            gen.writeEndObject();
+            //Basic trigger information tab data ends here
+
+            //Duplicated events tab data starts
+            gen.writeFieldName('duplicatedEvents');
+            gen.writeStartArray();
+            for(ApexTriggerAnalyzerResults.EventDuplicate dup: result.eventDuplicates) {
+                gen.writeStartObject();
+                gen.writeStringField('eventName', dup.eventName);
+                gen.writeFieldName('triggerName');
+                gen.writeStartArray();
+                for(String trg: dup.presentInTriggers) {
+                    gen.writeString(trg);
+                }
+                gen.writeEndArray();
+                gen.writeEndObject();
+            }
+            gen.writeEndArray();
+            //Duplicated events tab data ends
+
+            //LoopDMLs start here
+            gen.writeFieldName('loopDMLs');
+            gen.writeStartArray();
+            for(ApexTriggerAnalyzerResults.LoopDML loopDml: result.loopDmls) {
+                for(Integer lineNumber : loopDml.dmlStatements.keySet()) {
+                    gen.writeStartObject();
+                    gen.writeStringField('statement', loopDml.dmlStatements.get(lineNumber));
+                    gen.writeStringField('triggerName', loopDml.triggerName);
+                    gen.writeNumberField('lineNumber', lineNumber);
+                    gen.writeEndObject();
+                }
+            }
+            gen.writeEndArray();
+            //LoopDMLs end here
+
+            gen.writeEndObject();
+        }
         gen.writeEndArray();
         return gen.getAsString();
     }
