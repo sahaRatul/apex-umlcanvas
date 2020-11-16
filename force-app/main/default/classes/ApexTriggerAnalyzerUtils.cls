@@ -3,51 +3,51 @@ public with sharing class ApexTriggerAnalyzerUtils {
 
     }
 
-    public static String removeCommentsFromCode(String code) {
-        Integer n = code.length(); 
-        String result = ''; 
-        Boolean singleLineComment = false; 
-        Boolean multiLineComment = false; 
+    public static Map<String, String> removeCommentedCodeFromTrigger(List<ApexTrigger> apexTriggers, Boolean replaceMultiCommentsWithSpace){
+        String triggerbody;
+        Map<String, String> triggerNamesWithBody = new Map<String, String>();
+        
+        if(apexTriggers != null || !apexTriggers.isEmpty()){
+            for(ApexTrigger trig : apexTriggers){
+                if(trig.body == '(hidden)'){
+                    triggerNamesWithBody.put(trig.Name , 'Managed Package');
+                }else{
+                    triggerbody =  trig.body;
+                    List<String> lengthOfBody = triggerBody.split('\n');
 
-        for (Integer i = 0; i < n; i++) 
-        { 
-            // If single line comment flag is on, then check for end of it 
-            if (singleLineComment == true && code.subString(i, i + 1) == '\n') {
-                singleLineComment = false; 
+                    //Multi Line Comment
+                    if(triggerbody.contains('/*')){
+                        Integer count = triggerbody.countMatches('/*');
+                        for(Integer i = 0; i < count; i++){
+                            String removedpart = triggerbody.substringBetween('/*', '*/');
+                            if(replaceMultiCommentsWithSpace) {
+                                //Generate blank string
+                                String blankReplacementString = '';
+                                for(Integer j = 0; j < removedpart.length(); j++) {
+                                    blankReplacementString += (removedpart.substring(j, j + 1) == '\n' ? '\n' : ' ');
+                                }
+                                triggerbody = triggerbody.replace('/*'+removedpart+'*/', ('  ' + blankReplacementString + '  '));
+                            } else {
+                                triggerbody = triggerbody.remove('/*'+removedpart+'*/');
+                            }
+                        }
+                    }
+                    
+                    //Single Line Comment
+                    if(triggerbody.contains('//')){
+                        Integer count2 = triggerbody.countMatches('//');
+                        for(Integer i = 0; i < count2; i++){
+                            String removedpart = triggerbody.substringBetween('//', '\n');
+                            triggerbody = triggerbody.remove('//'+removedpart);
+                        }
+                    }
+                    if(triggerbody != null || triggerbody != ''){
+                        triggerNamesWithBody.put(trig.Name , triggerbody); 
+                    }
+                }
             }
-
-            // If multiple line comment is on, then check for end of it 
-            else if  (multiLineComment == true && code.subString(i, i + 2) == '*/') {
-                multiLineComment = false;
-                i++;
-                if(i >= n)
-                    break;
-            }
-
-            // If this character is in a comment, replace with empty character
-            else if (singleLineComment || multiLineComment) {
-                result += ' ';
-            }
-
-            // Check for beginning of comments and set the appropriate flags 
-            else if ((i + 2) <= n && code.subString(i, i + 2) == '//') {
-                singleLineComment = true;
-                i++;
-                if(i >= n)
-                    break;
-            }
-            else if ((i + 2) <= n && code.subString(i, i + 2) == '/*') {
-                multiLineComment = true;
-                i++; 
-                if(i >= n)
-                    break;
-            }
-            // If current character is a non-comment character, append it to result 
-            else {
-                result += code.subString(i, i + 1); 
-            }
-        } 
-        return result; 
+        }
+        return triggerNamesWithBody;
     }
 
     public static Map<Integer, String> detectLoopsFromCode(String code) {
@@ -102,52 +102,44 @@ public with sharing class ApexTriggerAnalyzerUtils {
         }
         return loopBodies;
     }
-    
-    public static Map<String, String> removeCommentedCodeFromTrigger(List<ApexTrigger> apexTriggers){
-        
-        String triggerbody;
-        Map<String, String> triggerNamesWithBody = new Map<String, String>();
-        
-        if(apexTriggers != null || !apexTriggers.isEmpty()){
-            for(ApexTrigger trig : apexTriggers){
-                if(trig.body == '(hidden)'){
-                    triggerNamesWithBody.put(trig.Name , 'Managed Package');
-                    
-                }else{
-                    triggerbody =  trig.body;
-                    List<String> lengthOfBody = triggerBody.split('\n');
-                    system.debug('Apex Triggers****'+triggerbody);
-                    system.debug('Apex Triggers****'+lengthOfBody.size());
-                    //Multi Line Comment
-                    if(triggerbody.contains('/*')){
-                        Integer count = triggerbody.countMatches('/*');
-                        for(Integer i = 0; i < count; i++){
-                            String removedpart = triggerbody.substringBetween('/*', '*/');
-                            triggerbody = triggerbody.remove('/*'+removedpart+'*/');
-                            
-                        }
-                        
-                    }
-                    
-                    //Single Line Comment
-                    if(triggerbody.contains('//')){
-                        Integer count2 = triggerbody.countMatches('//');
-                        for(Integer i = 0; i < count2; i++){
-                            String removedpart = triggerbody.substringBetween('//', '\n');
-                            triggerbody = triggerbody.remove('//'+removedpart);
-                            
-                        }
-                        
-                    }  
-                    
-                    if(triggerbody != null || triggerbody != ''){
-                        triggerNamesWithBody.put(trig.Name , triggerbody); 
-                    }
+
+    public static Map<Integer, String> getQueryStatementsFromCode(List<String> loopBodies, String fullBody) {
+        List<String> lines = fullBody.split('\n');
+        Map<Integer, String> returnMap = new Map<Integer, String>();
+
+        for(String loopBody: loopBodies) {
+            Pattern loopDetectionPattern = pattern.compile('(?i)\\b(select|insert|update|delete|upsert|undelete|Database.insert|Database.update|Database.delete|Database.upsert|Database.undelete)\\b');
+            Matcher loopMatcher = loopDetectionPattern.matcher(loopBody);
+
+            while(loopMatcher.find()) {
+                Integer position = loopMatcher.start();
+                String statement = '';
+                do {
+                    statement += loopBody.substring(position, position + 1);
+                    position++;
+                } while(loopBody.substring(position, position + 1) != ';');
+
+                //Once statement is received, get the substring from full body
+                Integer charIndex = fullBody.indexOf(statement);
+                String tempStr = fullBody.substring(0, charIndex);
+
+                Pattern newLineDetectionPattern = pattern.compile('\r\n|\r|\n');
+                Matcher newLinematcher = newLineDetectionPattern.matcher(tempStr);
+
+                Integer lineNumber = 1;
+                while(newLinematcher.find()) {
+                    lineNumber++;
                 }
-            } 
-            
+
+                if(!returnMap.containsKey(lineNumber)) {
+                    statement = statement.replaceAll(']', '');
+                    statement = statement.replaceAll('\n', ' ');
+                    returnMap.put(lineNumber, statement);
+                }
+            }
         }
-        return triggerNamesWithBody;
+
+        return returnMap;
     }
     
      public static Map<String, String> getBodyFromTrigger(List<ApexTrigger> apexTriggers){
@@ -174,8 +166,6 @@ public with sharing class ApexTriggerAnalyzerUtils {
     }
     
     public static Map<String, List<Integer>> getLineNumberOfTrigger(Map<String , List<String>> trigerBodyIdsMap, List<ApexTrigger> apexTriggers){
-        
-        
         Map<String, List<Integer>> idsWithLineNumbers = new Map<String, List<Integer>>();
         List<Integer> lineNumbersList = new List<Integer>();
         for(String body : trigerBodyIdsMap.keySet()){
@@ -201,5 +191,12 @@ public with sharing class ApexTriggerAnalyzerUtils {
             
         }
         return idsWithLineNumbers;
+    }
+
+    public static void getLineCount(String body) {
+        List<String> splitByLine = new List<String>();
+        splitByLine = body.split('\n');
+        //system.debug('splitByLine'+splitByLine);
+        system.debug('splitByLine: '+ splitByLine.size());
     }
 }

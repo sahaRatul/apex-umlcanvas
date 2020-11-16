@@ -23,8 +23,7 @@ public with sharing class ApexTriggerAnalyzer {
         result = checkTriggersForHardCodedIDs(apexTriggers, result);
         
         //Check for Queries without where clause
-        
-        result = ApexTriggerAnalyzer.Querieswithoutwhereclause(apexTriggers, result);
+        result = ApexTriggerAnalyzer.getQueriesWithoutWhereClause(apexTriggers, result);
         
         return result;
     }
@@ -88,29 +87,34 @@ public with sharing class ApexTriggerAnalyzer {
     }
     
     private static ApexTriggerAnalyzerResults findDmlInsideLoops(List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result) {
-        for(ApexTrigger apexTrigger : apexTriggers) {
-            //Remove comments from body
-            String cleanedupBody = ApexTriggerAnalyzerUtils.removeCommentsFromCode(apexTrigger.body);
-            
+        Map<String, String> cleanedUpTriggers = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers, true);
+
+        for(String trig: cleanedUpTriggers.keySet()) {
+            //Remove single and multiline comments from code
+            String cleanedupBody = cleanedUpTriggers.get(trig);
+
             //Get list of loops and their position in source code
             Map<Integer,String> loopPositionMap = ApexTriggerAnalyzerUtils.detectLoopsFromCode(cleanedupBody);
-            
+
             //Get the code block inside loop now
             List<String> loopBodies = ApexTriggerAnalyzerUtils.getLoopBodies(loopPositionMap, cleanedupBody);
-            System.debug(loopBodies);
+            
+            Map<Integer, String> statements = ApexTriggerAnalyzerUtils.getQueryStatementsFromCode(loopBodies, cleanedupBody);
+            
+            result.loopDmls.add(new ApexTriggerAnalyzerResults.LoopDML(trig, statements));
         }
+
         return result;
     }
     
     private static ApexTriggerAnalyzerResults checkTriggersForHardCodedIDs(List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result){
-        
         Map<String, String> triggerNamesWithBodyWithoutComments = new Map<String, String>();
         Map<String, String> mapOfObjNameAndPrefix = new Map<String,String>();
         List<String> idsPerTrigger = new List<String>();
         Map<String, List<Integer>> idsPerTriggerWithLineNumbers = new Map<String, List<Integer>>();
         Map<String, List<String>> hardCodedIdsresult = new Map<String, List<String>>();
         Map<String, List<String>> hardCodedIdsresultWithBodyMap = new Map<String, List<String>>();
-        triggerNamesWithBodyWithoutComments = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers);
+        triggerNamesWithBodyWithoutComments = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers, false);
         
         for ( Schema.SObjectType obj : Schema.getGlobalDescribe().values() )
         {
@@ -165,14 +169,14 @@ public with sharing class ApexTriggerAnalyzer {
         return result;
     }
     
-    private static ApexTriggerAnalyzerResults Querieswithoutwhereclause(List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result) {
+    private static ApexTriggerAnalyzerResults getQueriesWithoutWhereClause(List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result) {
         Integer countOfQueries=0;
         Map<String, String> triggerNamesWithBodyWithoutComments = new Map<String, String>();
         Map<String, String> mapOfObjName = new Map<String,String>();
         Map<String, Integer> ObjnameewithSOQL = new Map<String, Integer>();
         Map<String, Integer>SOQLwithwhereclause = new Map<String, Integer>();
         Map<String, Integer>SOQLwithoutwhereclause = new Map<String, Integer>();
-        triggerNamesWithBodyWithoutComments = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers);
+        triggerNamesWithBodyWithoutComments = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers, false);
         for ( Schema.SObjectType obj : Schema.getGlobalDescribe().values()) {
             Schema.DescribeSObjectResult objResult = obj.getDescribe();
             String objName = objResult.getName();

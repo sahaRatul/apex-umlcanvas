@@ -49,13 +49,18 @@ public with sharing class ApexTriggerAnalyzerResults {
         public LoopDML() {
             this.dmlStatements = new Map<Integer, String>();
         }
+
+        public LoopDML(String triggerName, Map<Integer, String> dmlStatements) {
+            this.triggerName = triggerName;
+            this.dmlStatements = dmlStatements;
+        }
         @AuraEnabled
-        public String loopType {get;set;}
+        public String triggerName {get;set;}
         @AuraEnabled
         public Map<Integer, String> dmlStatements{get;set;}
     }
-      
-   public class PDFWrapper 
+
+    public class PDFWrapper 
     {
         @AuraEnabled
         public String eventName{get;set;}
