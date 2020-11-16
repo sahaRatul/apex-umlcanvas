@@ -1,8 +1,18 @@
 ({
     init : function(component, event, helper) {
-        let dummyData = helper.getDummyData();
-        component.set('v.triggerAnalyzerReport', dummyData);
-        component.set('v.selectedObject', dummyData[0]);
+        let action = component.get("c.getStoredReport");
+        action.setParams({
+            reportId: component.get('v.recordId')
+        });
+        action.setCallback(this, function (result) {
+            let state = result.getState();
+            if (component.isValid() && state === "SUCCESS") {
+                let resultData = JSON.parse(result.getReturnValue());
+                component.set('v.triggerAnalyzerReport', resultData);
+                component.set('v.selectedObject', resultData[0]);
+            }
+        });
+        $A.enqueueAction(action);
     },
     objectNameClickHandler: function(component, event, helper) {
         let selectedVal = event.currentTarget.dataset.value;

@@ -2,6 +2,26 @@ public with sharing class ApexTriggerAnalyzer {
     public ApexTriggerAnalyzer() {
         
     }
+
+    @AuraEnabled
+    public static string getStoredReport(String reportId){
+        try {
+            List<ContentDocumentLink> contentDocumentLinks = [SELECT ContentDocumentId FROM ContentDocumentLink where LinkedEntityId =: Id.valueOf(reportId)];
+            Set<Id> documentIds = new Set<Id>();
+            for(ContentDocumentLink documentLink: contentDocumentLinks) {
+                documentIds.add(documentLink.ContentDocumentId);
+            }
+            List<ContentVersion> contentVersions = [SELECT VersionData, Title FROM ContentVersion WHERE ContentDocumentId in :documentIds AND IsLatest = true];
+            if(contentVersions.size() > 0) {
+                return contentVersions[0].VersionData.toString();
+            }
+            else {
+                return '[]';
+            }
+        } catch (Exception e) {
+            return '[]';
+        }
+    }
     
     @AuraEnabled
     public static Id analyzeObjectTriggers(List<String> objectNames) {
