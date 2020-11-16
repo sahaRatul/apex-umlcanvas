@@ -104,6 +104,7 @@ public with sharing class ApexTriggerAnalyzerUtils {
     }
     
     public static Map<String, String> removeCommentedCodeFromTrigger(List<ApexTrigger> apexTriggers){
+        
         String triggerbody;
         Map<String, String> triggerNamesWithBody = new Map<String, String>();
         
@@ -149,7 +150,8 @@ public with sharing class ApexTriggerAnalyzerUtils {
         return triggerNamesWithBody;
     }
     
-    public static Map<String, String> getBodyFromTrigger(List<ApexTrigger> apexTriggers){
+     public static Map<String, String> getBodyFromTrigger(List<ApexTrigger> apexTriggers){
+        
         String triggerbody;
         Map<String, String> triggerNamesWithBody = new Map<String, String>();
         
@@ -166,14 +168,18 @@ public with sharing class ApexTriggerAnalyzerUtils {
                     }
                 }
             } 
+            
         }
         return triggerNamesWithBody;
     }
     
     public static Map<String, List<Integer>> getLineNumberOfTrigger(Map<String , List<String>> trigerBodyIdsMap, List<ApexTrigger> apexTriggers){
+        
+        
         Map<String, List<Integer>> idsWithLineNumbers = new Map<String, List<Integer>>();
         List<Integer> lineNumbersList = new List<Integer>();
         for(String body : trigerBodyIdsMap.keySet()){
+            
             List<String> splitByLine = new List<String>();
             splitByLine = body.split('\n');
             system.debug('splitByLine'+splitByLine);
@@ -185,10 +191,14 @@ public with sharing class ApexTriggerAnalyzerUtils {
                     if(line.contains(trigerBodyIdsMap.get(body)[i])){
                         linenumber = splitByLine.indexOf(line);
                         lineNumbersList.add(linenumber);
+                        
                     }
+                
                 }
+                
                 idsWithLineNumbers.put(trigerBodyIdsMap.get(body)[i], lineNumbersList);
             }
+            
         }
         return idsWithLineNumbers;
     }

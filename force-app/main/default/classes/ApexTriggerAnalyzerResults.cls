@@ -21,6 +21,14 @@ public with sharing class ApexTriggerAnalyzerResults {
     @AuraEnabled
     public List<String> invalidTriggers{get;set;}
     @AuraEnabled
+    public Map<String, List<String>> hardCodedIdObjects {get;set;}
+    @AuraEnabled
+    public Map<String, Integer> SOQLQueries {get;set;}
+    @AuraEnabled
+    public Map<String,Integer> SOQLQuerieswithwhereclause {get;set;}
+    @AuraEnabled
+    public Map<String,Integer> SOQLQuerieswithoutwhereclause {get;set;}
+    @AuraEnabled
     public List<EventDuplicate> eventDuplicates {get;set;}
     @AuraEnabled
     public List<LoopDML> loopDmls {get;set;}
