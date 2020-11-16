@@ -9,23 +9,23 @@ public with sharing class ApexTriggerAnalyzer {
         
         //Get ApexTriggers for an object
         List<ApexTrigger> apexTriggers = ApexTriggerAnalyzer.getApexTriggerData(objectName);
+
+        //Separate Active, Inactive, Deleted, Managed and Invalid triggers
+        results = ApexTriggerAnalyzer.classifyTriggers(apexTriggers, results);
         
         //Check Triggers for duplicated events
-        ApexTriggerAnalyzerResults result = ApexTriggerAnalyzer.checkTriggersForDuplicateEvents(objectName, apexTriggers, results);
-        
-        //Separate Active, Inactive, Deleted, Managed and Invalid triggers
-        result = ApexTriggerAnalyzer.classifyTriggers(apexTriggers, result);
+        results = ApexTriggerAnalyzer.checkTriggersForDuplicateEvents(objectName, apexTriggers, results);
         
         //Check for Loops
-        result = ApexTriggerAnalyzer.findDmlInsideLoops(apexTriggers, result);
+        results = ApexTriggerAnalyzer.findDmlInsideLoops(apexTriggers, results);
         
         //check hardcoded ids in a trigger
-        result = checkTriggersForHardCodedIDs(apexTriggers, result);
+        results = ApexTriggerAnalyzer.checkTriggersForHardCodedIDs(apexTriggers, results);
         
         //Check for Queries without where clause
-        result = ApexTriggerAnalyzer.getQueriesWithoutWhereClause(apexTriggers, result);
+        results = ApexTriggerAnalyzer.getQueriesWithoutWhereClause(apexTriggers, results);
         
-        return result;
+        return results;
     }
     
     private static List<ApexTrigger> getApexTriggerData(String ObjectName) {
