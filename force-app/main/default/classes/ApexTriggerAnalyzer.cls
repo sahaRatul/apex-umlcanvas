@@ -153,8 +153,7 @@ public with sharing class ApexTriggerAnalyzer {
         Map<String, List<String>> hardCodedIdsresultWithBodyMap = new Map<String, List<String>>();
         triggerNamesWithBodyWithoutComments = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers, false);
         
-        for ( Schema.SObjectType obj : Schema.getGlobalDescribe().values() )
-        {
+        for ( Schema.SObjectType obj : Schema.getGlobalDescribe().values()) {
             Schema.DescribeSObjectResult objResult = obj.getDescribe();
             String objName = objResult.getName();
             String objPrefix = objResult.getKeyPrefix();
@@ -163,17 +162,14 @@ public with sharing class ApexTriggerAnalyzer {
             }
         }
         
-        
         //removing hardcoded ids logic
         for(String trigName : triggerNamesWithBodyWithoutComments.keySet()){
             String triggerBody = triggerNamesWithBodyWithoutComments.get(trigName);
-            
             for(String prefix : mapOfObjNameAndPrefix.keySet()){
-                
                 if(triggerBody.contains(prefix)){
                     system.debug('CountMatches'+prefix+triggerBody.countMatches(prefix));
                     Integer countOfIds = triggerBody.countMatches(prefix);
-                    for(Integer i = 0; i< countOfIds; i++){
+                    for(Integer i = 0; i < countOfIds; i++){
                         String finalId = prefix+triggerBody.substringBetween(prefix,'\'');
                         system.debug('Final Ids===>' +finalId);
                         if(finalId.length() == 15 || finalId.length() == 18){
@@ -181,20 +177,14 @@ public with sharing class ApexTriggerAnalyzer {
                             if(CheckValidSalesforceIDUtility.isValidSalesforceId(finalId, typ)){
                                 triggerBody = triggerBody.remove(finalId);
                                 idsPerTrigger.add(finalId);
-                                
                             }
                         }
                     }
-                    if(idsPerTrigger.size() !=0){
-                        
+                    if(idsPerTrigger.size() != 0) {
                         hardCodedIdsresultWithBodyMap.put(triggerBody , idsPerTrigger);
-                        //To get line numbers of IDs
-                        //idsPerTriggerWithLineNumbers =  ApexTriggerAnalyzerUtils.getLineNumberOfTrigger(hardCodedIdsresultWithBodyMap);
-                        
-                        
-                        hardCodedIdsresult.put(trigName , idsPerTrigger);
+                        hardCodedIdsresult.put(trigName, idsPerTrigger);
                         result.hardCodedIdObjects = hardCodedIdsresult;
-                    }else{
+                    } else {
                         //set a flag 
                     }
                 }
