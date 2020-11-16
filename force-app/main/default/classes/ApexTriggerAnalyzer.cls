@@ -91,10 +91,10 @@ public with sharing class ApexTriggerAnalyzer {
         for(ApexTrigger apexTrigger : apexTriggers) {
             //Remove comments from body
             String cleanedupBody = ApexTriggerAnalyzerUtils.removeCommentsFromCode(apexTrigger.body);
-
+            
             //Get list of loops and their position in source code
             Map<Integer,String> loopPositionMap = ApexTriggerAnalyzerUtils.detectLoopsFromCode(cleanedupBody);
-
+            
             //Get the code block inside loop now
             List<String> loopBodies = ApexTriggerAnalyzerUtils.getLoopBodies(loopPositionMap, cleanedupBody);
             System.debug(loopBodies);
@@ -112,18 +112,18 @@ public with sharing class ApexTriggerAnalyzer {
         Map<String, List<String>> hardCodedIdsresultWithBodyMap = new Map<String, List<String>>();
         triggerNamesWithBodyWithoutComments = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers);
         
-         for ( Schema.SObjectType obj : Schema.getGlobalDescribe().values() )
+        for ( Schema.SObjectType obj : Schema.getGlobalDescribe().values() )
         {
             Schema.DescribeSObjectResult objResult = obj.getDescribe();
             String objName = objResult.getName();
             String objPrefix = objResult.getKeyPrefix();
             if(objPrefix != null){
-            mapOfObjNameAndPrefix.put(objPrefix, objName);
+                mapOfObjNameAndPrefix.put(objPrefix, objName);
             }
         }
         
         
-      //removing hardcoded ids logic
+        //removing hardcoded ids logic
         for(String trigName : triggerNamesWithBodyWithoutComments.keySet()){
             String triggerBody = triggerNamesWithBodyWithoutComments.get(trigName);
             
@@ -148,8 +148,8 @@ public with sharing class ApexTriggerAnalyzer {
                         
                         hardCodedIdsresultWithBodyMap.put(triggerBody , idsPerTrigger);
                         //To get line numbers of IDs
-                       //idsPerTriggerWithLineNumbers =  ApexTriggerAnalyzerUtils.getLineNumberOfTrigger(hardCodedIdsresultWithBodyMap);
-                       
+                        //idsPerTriggerWithLineNumbers =  ApexTriggerAnalyzerUtils.getLineNumberOfTrigger(hardCodedIdsresultWithBodyMap);
+                        
                         
                         hardCodedIdsresult.put(trigName , idsPerTrigger);
                         result.hardCodedIdObjects = hardCodedIdsresult;
@@ -165,7 +165,7 @@ public with sharing class ApexTriggerAnalyzer {
         return result;
     }
     
-     private static ApexTriggerAnalyzerResults Querieswithoutwhereclause(List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result) {
+    private static ApexTriggerAnalyzerResults Querieswithoutwhereclause(List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result) {
         Integer countOfQueries=0;
         Map<String, String> triggerNamesWithBodyWithoutComments = new Map<String, String>();
         Map<String, String> mapOfObjName = new Map<String,String>();
