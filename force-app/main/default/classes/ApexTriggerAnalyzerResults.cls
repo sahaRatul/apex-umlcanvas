@@ -60,8 +60,7 @@ public with sharing class ApexTriggerAnalyzerResults {
         public Map<Integer, String> dmlStatements{get;set;}
     }
 
-    public class PDFWrapper 
-    {
+    public class PDFWrapper {
         @AuraEnabled
         public String eventName{get;set;}
         @AuraEnabled

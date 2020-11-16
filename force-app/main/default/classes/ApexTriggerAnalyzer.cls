@@ -4,28 +4,33 @@ public with sharing class ApexTriggerAnalyzer {
     }
     
     @AuraEnabled
-    public static ApexTriggerAnalyzerResults analyzeObjectTriggers(String objectName) {
-        ApexTriggerAnalyzerResults results = new ApexTriggerAnalyzerResults();
-        
-        //Get ApexTriggers for an object
-        List<ApexTrigger> apexTriggers = ApexTriggerAnalyzer.getApexTriggerData(objectName);
+    public static Id analyzeObjectTriggers(List<String> objectNames) {
+        List<ApexTriggerAnalyzerResults> resultList = new List<ApexTriggerAnalyzerResults>();
 
-        //Separate Active, Inactive, Deleted, Managed and Invalid triggers
-        results = ApexTriggerAnalyzer.classifyTriggers(apexTriggers, results);
+        for(String objectName : objectNames) {
+            ApexTriggerAnalyzerResults results = new ApexTriggerAnalyzerResults();
         
-        //Check Triggers for duplicated events
-        results = ApexTriggerAnalyzer.checkTriggersForDuplicateEvents(objectName, apexTriggers, results);
-        
-        //Check for Loops
-        results = ApexTriggerAnalyzer.findDmlInsideLoops(apexTriggers, results);
-        
-        //check hardcoded ids in a trigger
-        results = ApexTriggerAnalyzer.checkTriggersForHardCodedIDs(apexTriggers, results);
-        
-        //Check for Queries without where clause
-        results = ApexTriggerAnalyzer.getQueriesWithoutWhereClause(apexTriggers, results);
-        
-        return results;
+            //Get ApexTriggers for an object
+            List<ApexTrigger> apexTriggers = ApexTriggerAnalyzer.getApexTriggerData(objectName);
+    
+            //Separate Active, Inactive, Deleted, Managed and Invalid triggers
+            results = ApexTriggerAnalyzer.classifyTriggers(apexTriggers, results);
+            
+            //Check Triggers for duplicated events
+            results = ApexTriggerAnalyzer.checkTriggersForDuplicateEvents(objectName, apexTriggers, results);
+            
+            //Check for Loops
+            results = ApexTriggerAnalyzer.findDmlInsideLoops(apexTriggers, results);
+            
+            //check hardcoded ids in a trigger
+            results = ApexTriggerAnalyzer.checkTriggersForHardCodedIDs(apexTriggers, results);
+            
+            //Check for Queries without where clause
+            results = ApexTriggerAnalyzer.getQueriesWithoutWhereClause(apexTriggers, results);
+
+            resultList.add(results);
+        }
+        return ApexTriggerAnalyzer.generateReportRecord(resultList);
     }
     
     private static List<ApexTrigger> getApexTriggerData(String ObjectName) {
@@ -36,6 +41,16 @@ public with sharing class ApexTriggerAnalyzer {
             UsageAfterUpdate,UsageBeforeDelete,UsageBeforeInsert,UsageBeforeUpdate, 
             UsageIsBulk FROM ApexTrigger WHERE TableEnumOrId =: ObjectName
         ];
+    }
+
+    private static Id generateReportRecord(List<ApexTriggerAnalyzerResults> results) {
+        Trigger_Analyzer_Report__c report = new Trigger_Analyzer_Report__c();
+        insert report;
+
+        String jsonReport = ApexTriggerAnalyzerUtils.getJsonReport(results);
+        ApexFileUpload.uploadFile(jsonReport, 'reeport.json', report.id);
+
+        return report.id;
     }
     
     private static ApexTriggerAnalyzerResults checkTriggersForDuplicateEvents(String objectName, List<ApexTrigger> apexTriggers, ApexTriggerAnalyzerResults result) {

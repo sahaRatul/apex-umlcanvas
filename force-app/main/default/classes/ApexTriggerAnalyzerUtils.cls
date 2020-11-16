@@ -199,4 +199,11 @@ public with sharing class ApexTriggerAnalyzerUtils {
         //system.debug('splitByLine'+splitByLine);
         system.debug('splitByLine: '+ splitByLine.size());
     }
+
+    public static String getJsonReport(List<ApexTriggerAnalyzerResults> results) {
+        JSONGenerator gen = JSON.createGenerator(true);
+        gen.writeStartArray();
+        gen.writeEndArray();
+        return gen.getAsString();
+    }
 }
