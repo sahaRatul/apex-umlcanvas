@@ -143,55 +143,24 @@ public with sharing class ApexTriggerAnalyzerUtils {
 
         return returnMap;
     }
-    
-     public static Map<String, String> getBodyFromTrigger(List<ApexTrigger> apexTriggers){
-        
-        String triggerbody;
-        Map<String, String> triggerNamesWithBody = new Map<String, String>();
-        
-        if(apexTriggers != null || !apexTriggers.isEmpty()){
-            for(ApexTrigger trig : apexTriggers){
-                if(trig.body == '(hidden)'){
-                    //do something
-                    
-                }else{
-                    triggerbody =  trig.body;
-                  
-                    if(triggerbody != null || triggerbody != ''){
-                        triggerNamesWithBody.put(trig.Name , triggerbody); 
-                    }
-                }
-            } 
-            
-        }
-        return triggerNamesWithBody;
-    }
-    
-    public static Map<String, List<Integer>> getLineNumberOfTrigger(Map<String , List<String>> trigerBodyIdsMap, List<ApexTrigger> apexTriggers){
-        Map<String, List<Integer>> idsWithLineNumbers = new Map<String, List<Integer>>();
+ 
+    public static List<Integer> getLineNumberOfTrigger(String triggerBody, String hardcodedId){
         List<Integer> lineNumbersList = new List<Integer>();
-        for(String body : trigerBodyIdsMap.keySet()){
-            
-            List<String> splitByLine = new List<String>();
-            splitByLine = body.split('\n');
-            system.debug('splitByLine'+splitByLine);
-            system.debug('splitByLine'+splitByLine.size());
-            for(Integer i = 0; i < trigerBodyIdsMap.get(body).size(); i++){
-                Integer linenumber;
-                for(String line : splitByLine){
-                    
-                    if(line.contains(trigerBodyIdsMap.get(body)[i])){
-                        linenumber = splitByLine.indexOf(line);
-                        lineNumbersList.add(linenumber);
-                    }
-                }
-                
-                idsWithLineNumbers.put(trigerBodyIdsMap.get(body)[i], lineNumbersList);
+        List<String> splitByLine = new List<String>();
+        splitByLine = triggerBody.split('\n');
+        system.debug('splitByLine'+splitByLine);
+        system.debug('splitByLine'+splitByLine.size());
+        
+        Integer linenumber = 0;
+        for(String line : splitByLine){
+            linenumber++;
+            if(line.contains(hardcodedId)) {
+                lineNumbersList.add(linenumber);
             }
         }
-        return idsWithLineNumbers;
+        return lineNumbersList;
     }
-
+    
     public static String getJsonReport(List<ApexTriggerAnalyzerResults> results) {
         String finalStr = '[';
         for(ApexTriggerAnalyzerResults result: results) {
