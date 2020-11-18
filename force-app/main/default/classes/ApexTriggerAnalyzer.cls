@@ -228,4 +228,51 @@ public with sharing class ApexTriggerAnalyzer {
         }
         return result;
     }
+    
+    /***********************************************************************************************************************
+     * Method invoked from Objects_Selection_dropdown_Comp that displays SObjects.     
+     * *********************************************************************************************************************/
+    @AuraEnabled
+    public static objectsAndErrorMessageWrapper fetchSObjectList(){
+        Set<String> objectswithTrigger = new Set<String>();
+        List<String> objectswithTriggerList = new List<String>();
+        List<ApexTrigger> activeTriggers = new List<ApexTrigger>();
+        objectsAndErrorMessageWrapper objectWrapper = new objectsAndErrorMessageWrapper();
+        try {
+            activeTriggers = getActiveTriggers();
+        } catch(Exception e) {
+            System.debug('Error Message is=> '+e.getMessage());
+            System.debug('Error Line is=> '+e.getLineNumber());
+            objectWrapper.errorMessage = 'EXCEPTION';
+        }
+        if(!activeTriggers.isEmpty()){
+            for(ApexTrigger rec :  activeTriggers){
+                if(rec.Body == '(hidden)'){
+                    String objectName = rec.TableEnumOrId +'  [⇩]';
+                    objectsWithTrigger.add(objectName);
+                }else{
+                    objectsWithTrigger.add(rec.TableEnumOrId);
+                }
+            }
+            objectWrapper.errorMessage = 'SUCCESS';  
+        }
+        system.debug(objectswithTrigger);
+        objectswithTriggerList.addAll(objectswithTrigger);
+        objectswithTriggerList.sort();
+        objectWrapper.sObjectNames = objectswithTriggerList;
+        return objectWrapper;
+    }
+    
+    //Get the list of active trigers to display on the drop down
+    private static List<ApexTrigger> getActiveTriggers(){
+        return [Select name,TableEnumOrId,body,Status from ApexTrigger where Status = 'Active'];
+    }
+    
+    //Wrapper Class for storing List of objects and error message
+    public class objectsAndErrorMessageWrapper {
+        @AuraEnabled
+        public List<String> sObjectNames{set;get;}
+        @AuraEnabled
+        public String errorMessage{set;get;}
+    }
 }

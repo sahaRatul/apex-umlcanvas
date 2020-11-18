@@ -143,6 +143,12 @@ public with sharing class ApexTriggerAnalyzerUtils {
 
         return returnMap;
     }
+
+    public static Map<Integer, String> getSelectStatementsFromCode(String fullBody) {
+        Map<Integer,String> retMap = new Map<Integer,String>();
+        //Pass 1 - Get a select statements bound by []
+        return retMap;
+    }
  
     public static List<Integer> getLineNumberOfTrigger(String triggerBody, String hardcodedId){
         List<Integer> lineNumbersList = new List<Integer>();
@@ -160,7 +166,7 @@ public with sharing class ApexTriggerAnalyzerUtils {
         }
         return lineNumbersList;
     }
-    
+
     public static String getJsonReport(List<ApexTriggerAnalyzerResults> results) {
         String finalStr = '[';
         for(ApexTriggerAnalyzerResults result: results) {
