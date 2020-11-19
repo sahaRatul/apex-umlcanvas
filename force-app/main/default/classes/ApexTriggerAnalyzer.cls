@@ -64,9 +64,9 @@ public with sharing class ApexTriggerAnalyzer {
         ];
     }
 
-    private static Id generateReportRecord(List<ApexTriggerAnalyzerResults> results , String trigerReportName) {
+    private static Id generateReportRecord(List<ApexTriggerAnalyzerResults> results , String triggerReportName) {
         Trigger_Analyzer_Report__c report = new Trigger_Analyzer_Report__c();
-        report.TrigerAnalyser_Report_Name__c = trigerReportName;
+        report.TrigerAnalyser_Report_Name__c = triggerReportName;
         insert report;
 
         String jsonReport = ApexTriggerAnalyzerUtils.getJsonReport(results);
@@ -200,32 +200,32 @@ public with sharing class ApexTriggerAnalyzer {
         Map<String, Integer>SOQLwithwhereclause = new Map<String, Integer>();
         Map<String, Integer>SOQLwithoutwhereclause = new Map<String, Integer>();
         triggerNamesWithBodyWithoutComments = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers, false);
-        for ( Schema.SObjectType obj : Schema.getGlobalDescribe().values()) {
+        for (Schema.SObjectType obj : Schema.getGlobalDescribe().values()) {
             Schema.DescribeSObjectResult objResult = obj.getDescribe();
             String objName = objResult.getName();
             String SelectString ='select';
             mapOfObjName.put(SelectString, objName);
         }
         for(String trigName : triggerNamesWithBodyWithoutComments.keySet()){
-            Integer d =0;
+            Integer d = 0;
             String triggerBody = triggerNamesWithBodyWithoutComments.get(trigName).toLowerCase();
             
             for(String prefix : mapOfObjName.keySet()) {
                 countOfQueries = triggerBody.countMatches('select');
-                system.debug('countOfQueries'+countOfQueries);
+                system.debug('countOfQueries'+ countOfQueries);
                 ObjnameewithSOQL.put(trigName, countOfQueries);   
-                System.debug('ObjnameewithSOQL'+ObjnameewithSOQL);
+                System.debug('ObjnameewithSOQL'+ ObjnameewithSOQL);
                 result.SOQLQueries = ObjnameewithSOQL;
                 Integer Querieswithwhereclause = triggerBody.countMatches('where');
-                system.debug('Querieswithwhereclause'+Querieswithwhereclause);
+                system.debug('Querieswithwhereclause'+ Querieswithwhereclause);
                 SOQLwithwhereclause.put(trigName, Querieswithwhereclause);
-                result.SOQLQuerieswithoutwhereclause=SOQLwithwhereclause;
-                system.debug('SOQLwithwhereclause'+SOQLwithwhereclause);
-                Integer Querieswithoutwhereclause = countOfQueries-Querieswithwhereclause;
+                result.soqlQueriesWithoutWhereClause = SOQLwithwhereclause;
+                system.debug('SOQLwithwhereclause'+ SOQLwithwhereclause);
+                Integer Querieswithoutwhereclause = countOfQueries - Querieswithwhereclause;
                 system.debug('Withoutwhereclause'+Querieswithoutwhereclause);
                 SOQLwithoutwhereclause.put(trigName, Querieswithoutwhereclause);
-                system.debug('SOQLwithoutwhereclause'+SOQLwithoutwhereclause);
-                result.SOQLQuerieswithoutwhereclause = SOQLwithoutwhereclause;
+                system.debug('SOQLwithoutwhereclause'+ SOQLwithoutwhereclause);
+                result.soqlQueriesWithoutWhereClause = SOQLwithoutwhereclause;
             }
         }
         return result;

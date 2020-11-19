@@ -167,6 +167,9 @@
                                         <div class="slds-truncate" title="Statement">Statement</div>
                                     </th>
                                     <th class="" scope="col">
+                                        <div class="slds-truncate" title="Type">Type</div>
+                                    </th>
+                                    <th class="" scope="col">
                                         <div class="slds-truncate" title="Present in Trigger">Present in Trigger</div>
                                     </th>
                                     <th class="" scope="col">
@@ -179,6 +182,9 @@
                                     <tr class="slds-hint-parent">
                                         <td data-label="Statement">
                                             <div class="slds-truncate" title="{!item.statement}">{!item.statement}</div>
+                                        </td>
+                                        <td data-label="Type">
+                                            <div class="slds-truncate" title="{!item.statementType}">{!item.statementType}</div>
                                         </td>
                                         <td data-label="Present in Trigger">
                                             <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}

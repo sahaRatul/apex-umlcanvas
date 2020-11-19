@@ -26,9 +26,9 @@ public with sharing class ApexTriggerAnalyzerResults {
     @AuraEnabled
     public Map<String, Integer> SOQLQueries {get;set;}
     @AuraEnabled
-    public Map<String,Integer> SOQLQuerieswithwhereclause {get;set;}
+    public Map<String,Integer> soqlQueriesWithWhereClause {get;set;}
     @AuraEnabled
-    public Map<String,Integer> SOQLQuerieswithoutwhereclause {get;set;}
+    public Map<String,Integer> soqlQueriesWithoutWhereClause {get;set;}
     @AuraEnabled
     public List<EventDuplicate> eventDuplicates {get;set;}
     @AuraEnabled
@@ -145,7 +145,9 @@ public with sharing class ApexTriggerAnalyzerResults {
         for(ApexTriggerAnalyzerResults.LoopDML loopDml: result.loopDmls) {
             for(Integer lineNumber : loopDml.dmlStatements.keySet()) {
                 gen.writeStartObject();
-                gen.writeStringField('statement', loopDml.dmlStatements.get(lineNumber));
+                String statement = loopDml.dmlStatements.get(lineNumber);
+                gen.writeStringField('statement', statement);
+                gen.writeStringField('statementType', (statement.toLowerCase().contains('select') || statement.toLowerCase().contains('database.query') ? 'SOQL' : 'DML'));
                 gen.writeStringField('triggerName', loopDml.triggerName);
                 gen.writeNumberField('lineNumber', lineNumber);
                 gen.writeEndObject();
