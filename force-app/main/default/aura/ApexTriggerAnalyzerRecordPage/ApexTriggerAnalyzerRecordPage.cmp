@@ -4,6 +4,7 @@
 
     <!--ATTRIBUTES-->
     <aura:attribute name="triggerAnalyzerReport" type="List" default="[]" />
+    <aura:attribute name="triggerIdList" type="List" default="[]" />
     <aura:attribute name="selectedObject" type="Map" default="{}" />
     <aura:attribute name="activeSections" type="List" />
     <aura:attribute name="activeSectionsMessage" type="String" default="" />

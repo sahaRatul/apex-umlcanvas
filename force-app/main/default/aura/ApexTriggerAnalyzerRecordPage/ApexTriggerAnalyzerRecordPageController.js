@@ -3,15 +3,12 @@
         let action = component.get("c.getStoredReport");
         var recIdfromVf = component.get("v.recordIdFromVf");
         var recordIdComp;
-        if(!recIdfromVf){
-            console.log("yyyyy");
+        if(!recIdfromVf) {
             recordIdComp = component.get("v.recordId");
-        }else{
-            console.log("xxxxxx");
+        } else {
             recordIdComp = recIdfromVf;
         }
-        
-        console.log(recIdfromVf  + ")))" + recordIdComp);
+
         action.setParams({
             reportId: recordIdComp
         });
@@ -19,9 +16,22 @@
             let state = result.getState();
             if (component.isValid() && state === "SUCCESS") {
                 let resultData = JSON.parse(result.getReturnValue());
-                console.log(resultData);
+                let accounts = resultData.map(x => x.objectApiName);
+
                 component.set('v.triggerAnalyzerReport', resultData);
                 component.set('v.selectedObject', resultData[0]);
+
+                let action2 = component.get("c.getApexTriggerListWithIds");
+                action2.setParams({
+                    objectNames: accounts
+                });
+                action2.setCallback(this, function (result2) {
+                    if (component.isValid() && state === "SUCCESS") {
+                        let resultData2 = result2.getReturnValue();
+                        component.set('v.triggerIdList', resultData2);
+                    }
+                });
+                $A.enqueueAction(action2);
             }
         });
         $A.enqueueAction(action);

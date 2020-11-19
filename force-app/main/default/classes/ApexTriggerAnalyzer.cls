@@ -245,16 +245,16 @@ public with sharing class ApexTriggerAnalyzer {
         try {
             activeTriggers = getActiveTriggers();
         } catch(Exception e) {
-            System.debug('Error Message is=> '+e.getMessage());
-            System.debug('Error Line is=> '+e.getLineNumber());
+            System.debug('Error Message is=> '+ e.getMessage());
+            System.debug('Error Line is=> '+ e.getLineNumber());
             objectWrapper.errorMessage = 'EXCEPTION';
         }
         if(!activeTriggers.isEmpty()){
             for(ApexTrigger rec :  activeTriggers){
-                if(rec.Body == '(hidden)'){
+                if(rec.Body == '(hidden)') {
                     String objectName = rec.TableEnumOrId +'  [⇩]';
                     objectsWithTrigger.add(objectName);
-                } else{
+                } else {
                     objectsWithTrigger.add(rec.TableEnumOrId);
                 }
             }
