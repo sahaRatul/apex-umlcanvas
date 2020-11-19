@@ -1,7 +1,13 @@
 public with sharing class ApexTriggerAnalyzer {
     public string recordId {get;set;}
+
     public ApexTriggerAnalyzer(ApexPages.StandardController controller) {
         recordID = ApexPages.CurrentPage().getparameters().get('id'); 
+    }
+
+    @AuraEnabled
+    public static List<ApexTrigger> getApexTriggerListWithIds(List<String> objectNames){
+        return [SELECT Id, Name from ApexTrigger WHERE TableEnumOrId =: ObjectNames];
     }
 
     @AuraEnabled
@@ -213,7 +219,7 @@ public with sharing class ApexTriggerAnalyzer {
             String triggerBody = triggerNamesWithBodyWithoutComments.get(trigName).toLowerCase();
             Integer queriesWithWhereClause = 0;
             Integer queriesWithoutWhereClause = 0;
-            
+
             for(String prefix : mapOfObjName.keySet()) {
                 countOfQueries = triggerBody.countMatches('select');
                 objNameWithSoql.put(trigName, countOfQueries);   
