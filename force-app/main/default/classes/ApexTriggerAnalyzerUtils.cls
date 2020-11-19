@@ -168,12 +168,12 @@ public with sharing class ApexTriggerAnalyzerUtils {
     }
 
     public static String getJsonReport(List<ApexTriggerAnalyzerResults> results) {
-        String finalStr = '[';
+        JSONGenerator gen = JSON.createGenerator(true);
+        gen.writeStartArray();
         for(ApexTriggerAnalyzerResults result: results) {
-            finalStr += (result.generateJSON(result) + ',\n');
+            result.generateJSON(result, gen);
         }
-        finalStr = finalStr.substring(0, finalStr.length() - 2);
-        finalStr += ']';
-        return finalStr;
+        gen.writeEndArray();
+        return gen.getAsString();
     }
 }

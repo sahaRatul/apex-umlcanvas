@@ -79,8 +79,7 @@ public with sharing class ApexTriggerAnalyzerResults {
         public Map<Integer, String> hardCodedIds{get;set;}
     }
 
-    public string generateJSON(ApexTriggerAnalyzerResults result) {
-        JSONGenerator gen = JSON.createGenerator(true);
+    public void generateJSON(ApexTriggerAnalyzerResults result, JSONGenerator gen) {
         gen.writeStartObject();
 
         gen.writeStringField('objectName', result.objectName);
@@ -171,7 +170,10 @@ public with sharing class ApexTriggerAnalyzerResults {
         gen.writeEndArray();
         //HardCoded Ids end here
 
+        //SOQLs without where clause
+        gen.writeNumberField('soqlCountWithoutWhere', result.soqlQueriesWithoutWhereClause.size());
+        //SOQLs without where clause ends
+
         gen.writeEndObject();
-        return gen.getAsString();
     }
 }
