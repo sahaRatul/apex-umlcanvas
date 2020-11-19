@@ -8,6 +8,7 @@ public with sharing class ApexTriggerAnalyzerResults {
         this.eventDuplicates = new List<EventDuplicate>();
         this.loopDmls = new List<LoopDML>();
         this.hardCodedIds = new List<HardCodedId>();
+        this.soqlStatistics = new List<SoqlStatistics>();
     }
     @AuraEnabled
     public String objectName{get;set;}
@@ -22,19 +23,13 @@ public with sharing class ApexTriggerAnalyzerResults {
     @AuraEnabled
     public List<String> invalidTriggers{get;set;}
     @AuraEnabled
-    public Map<String, List<String>> hardCodedIdObjects {get;set;}
-    @AuraEnabled
-    public Map<String, Integer> SOQLQueries {get;set;}
-    @AuraEnabled
-    public Map<String,Integer> soqlQueriesWithWhereClause {get;set;}
-    @AuraEnabled
-    public Map<String,Integer> soqlQueriesWithoutWhereClause {get;set;}
-    @AuraEnabled
     public List<EventDuplicate> eventDuplicates {get;set;}
     @AuraEnabled
     public List<LoopDML> loopDmls {get;set;}
     @AuraEnabled
     public List<HardCodedId> hardCodedIds {get;set;}
+    @AuraEnabled
+    public List<SoqlStatistics> soqlStatistics{get; set;}
  
     public class EventDuplicate {
         public EventDuplicate() {
@@ -77,6 +72,24 @@ public with sharing class ApexTriggerAnalyzerResults {
         public String triggerName {get;set;}
         @AuraEnabled
         public Map<Integer, String> hardCodedIds{get;set;}
+    }
+
+    public class SoqlStatistics {
+        public SoqlStatistics(String triggerName, Integer soqlQueryCount, Integer soqlQueriesWithWhereClauseCount, Integer soqlQueriesWithoutWhereClauseCount) {
+            this.triggerName = triggerName;
+            this.soqlQueryCount = soqlQueryCount;
+            this.soqlQueriesWithWhereClauseCount = soqlQueriesWithWhereClauseCount;
+            this.soqlQueriesWithoutWhereClauseCount = soqlQueriesWithoutWhereClauseCount;
+        }
+
+        @AuraEnabled
+        public String triggerName {get;set;}
+        @AuraEnabled
+        public Integer soqlQueryCount {get;set;}
+        @AuraEnabled
+        public Integer soqlQueriesWithWhereClauseCount {get;set;}
+        @AuraEnabled
+        public Integer soqlQueriesWithoutWhereClauseCount {get;set;}
     }
 
     public void generateJSON(ApexTriggerAnalyzerResults result, JSONGenerator gen) {
@@ -170,10 +183,20 @@ public with sharing class ApexTriggerAnalyzerResults {
         gen.writeEndArray();
         //HardCoded Ids end here
 
-        //SOQLs without where clause
-        gen.writeNumberField('soqlCountWithoutWhere', result.soqlQueriesWithoutWhereClause.size());
-        //SOQLs without where clause ends
-
+        //SOQLs stats
+        gen.writeFieldName('soqlStatistics');
+        gen.writeStartArray();
+        for(ApexTriggerAnalyzerResults.SoqlStatistics soqlStat : result.soqlStatistics) {
+            gen.writeStartObject();
+            gen.writeStringField('triggerName', soqlStat.triggerName);
+            gen.writeNumberField('soqlCount', soqlStat.soqlQueryCount);
+            gen.writeNumberField('soqlWithWhereCount', soqlStat.soqlQueriesWithWhereClauseCount);
+            gen.writeNumberField('soqlWithoutWhereCount', soqlStat.soqlQueriesWithoutWhereClauseCount);
+            gen.writeEndObject();
+        }
+        gen.writeEndArray();
+        //SOQLs stats end
+        
         gen.writeEndObject();
     }
 }

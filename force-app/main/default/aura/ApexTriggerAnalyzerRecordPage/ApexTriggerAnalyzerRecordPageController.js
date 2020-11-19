@@ -19,6 +19,7 @@
             let state = result.getState();
             if (component.isValid() && state === "SUCCESS") {
                 let resultData = JSON.parse(result.getReturnValue());
+                console.log(resultData);
                 component.set('v.triggerAnalyzerReport', resultData);
                 component.set('v.selectedObject', resultData[0]);
             }

@@ -196,37 +196,33 @@ public with sharing class ApexTriggerAnalyzer {
         Integer countOfQueries=0;
         Map<String, String> triggerNamesWithBodyWithoutComments = new Map<String, String>();
         Map<String, String> mapOfObjName = new Map<String,String>();
-        Map<String, Integer> ObjnameewithSOQL = new Map<String, Integer>();
-        Map<String, Integer>SOQLwithwhereclause = new Map<String, Integer>();
-        Map<String, Integer>SOQLwithoutwhereclause = new Map<String, Integer>();
+        Map<String, Integer> objNameWithSoql = new Map<String, Integer>();
+        Map<String, Integer> soqlWithWhereClause = new Map<String, Integer>();
+        Map<String, Integer> soqlWithoutWhereClause = new Map<String, Integer>();
         triggerNamesWithBodyWithoutComments = ApexTriggerAnalyzerUtils.removeCommentedCodeFromTrigger(apexTriggers, false);
+        
         for (Schema.SObjectType obj : Schema.getGlobalDescribe().values()) {
             Schema.DescribeSObjectResult objResult = obj.getDescribe();
             String objName = objResult.getName();
             String SelectString ='select';
             mapOfObjName.put(SelectString, objName);
         }
+        
         for(String trigName : triggerNamesWithBodyWithoutComments.keySet()){
             Integer d = 0;
             String triggerBody = triggerNamesWithBodyWithoutComments.get(trigName).toLowerCase();
+            Integer queriesWithWhereClause = 0;
+            Integer queriesWithoutWhereClause = 0;
             
             for(String prefix : mapOfObjName.keySet()) {
                 countOfQueries = triggerBody.countMatches('select');
-                system.debug('countOfQueries'+ countOfQueries);
-                ObjnameewithSOQL.put(trigName, countOfQueries);   
-                System.debug('ObjnameewithSOQL'+ ObjnameewithSOQL);
-                result.SOQLQueries = ObjnameewithSOQL;
-                Integer Querieswithwhereclause = triggerBody.countMatches('where');
-                system.debug('Querieswithwhereclause'+ Querieswithwhereclause);
-                SOQLwithwhereclause.put(trigName, Querieswithwhereclause);
-                result.soqlQueriesWithoutWhereClause = SOQLwithwhereclause;
-                system.debug('SOQLwithwhereclause'+ SOQLwithwhereclause);
-                Integer Querieswithoutwhereclause = countOfQueries - Querieswithwhereclause;
-                system.debug('Withoutwhereclause'+Querieswithoutwhereclause);
-                SOQLwithoutwhereclause.put(trigName, Querieswithoutwhereclause);
-                system.debug('SOQLwithoutwhereclause'+ SOQLwithoutwhereclause);
-                result.soqlQueriesWithoutWhereClause = SOQLwithoutwhereclause;
+                objNameWithSoql.put(trigName, countOfQueries);   
+                queriesWithWhereClause = triggerBody.countMatches('where');
+                soqlWithWhereClause.put(trigName, queriesWithWhereClause);
+                queriesWithoutWhereClause = countOfQueries - queriesWithWhereClause;
+                soqlWithoutWhereClause.put(trigName, queriesWithoutWhereClause);
             }
+            result.soqlStatistics.add(new ApexTriggerAnalyzerResults.SoqlStatistics(trigName, countOfQueries, queriesWithWhereClause, queriesWithoutWhereClause));
         }
         return result;
     }
@@ -252,7 +248,7 @@ public with sharing class ApexTriggerAnalyzer {
                 if(rec.Body == '(hidden)'){
                     String objectName = rec.TableEnumOrId +'  [⇩]';
                     objectsWithTrigger.add(objectName);
-                }else{
+                } else{
                     objectsWithTrigger.add(rec.TableEnumOrId);
                 }
             }
