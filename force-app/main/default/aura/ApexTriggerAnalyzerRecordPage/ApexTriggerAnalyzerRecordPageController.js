@@ -1,9 +1,9 @@
 ({
-    init : function(component, event, helper) {
+    init: function (component, event, helper) {
         let action = component.get("c.getStoredReport");
         var recIdfromVf = component.get("v.recordIdFromVf");
         var recordIdComp;
-        if(!recIdfromVf) {
+        if (!recIdfromVf) {
             recordIdComp = component.get("v.recordId");
         } else {
             recordIdComp = recIdfromVf;
@@ -36,7 +36,25 @@
         });
         $A.enqueueAction(action);
     },
-    objectNameClickHandler: function(component, event, helper) {
+    triggerNameClickHandler: function (component, event, helper) {
+        event.preventDefault();
+        let elem = event.currentTarget;
+        let triggerName = elem.getAttribute("data-trigger-name");
+        let triggerNameIdList = component.get('v.triggerIdList');
+
+        let selectedTrigger = triggerNameIdList.filter(x => x.Name === triggerName)[0];
+
+        let navEvt = $A.get("e.force:navigateToSObject");
+        navEvt.setParams({
+            "recordId": selectedTrigger.Id,
+            "slideDevName": "related"
+        });
+        navEvt.fire();
+    },
+    navigateToRecord: function (component, event, helper) {
+        window.open('/' + event.getParam('recordId'));
+    },
+    objectNameClickHandler: function (component, event, helper) {
         let selectedVal = event.currentTarget.dataset.value;
         let selectedObject = component.get('v.triggerAnalyzerReport').filter(x => x.objectApiName === selectedVal);
         component.set('v.selectedObject', selectedObject[0] ? selectedObject[0] : component.get('v.triggerAnalyzerReport')[0]);
@@ -50,7 +68,7 @@
             cmp.set('v.activeSectionsMessage', "Open sections: " + openSections.join(', '));
         }
     },
-    onmousehover : function(component, event, helper) {
+    onmousehover: function (component, event, helper) {
         console.log('=onmousehover===');
         component.set('v.isTooltip', true);
     }

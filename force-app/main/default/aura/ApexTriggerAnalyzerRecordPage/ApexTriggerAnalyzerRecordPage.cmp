@@ -13,6 +13,7 @@
 
     <!--HANDLERS-->
     <aura:handler name="init" value="{!this}" action="{!c.init}" />
+    <aura:handler name="navigationEvent" event="force:navigateToSObject" action="{!c.navigateToRecord}" />
 
     <div class="slds-box slds-theme_default" style="height:70vh">
         <div class="slds-grid slds-gutters">
@@ -46,8 +47,12 @@
                                         This Section indicates active Triggers per Object..
                                     </ui:message>
                                     <div Class="slds-text-body_medium">
-                                        <aura:iteration items="{!v.selectedObject.triggerDetails.activeTriggers}" var="item">
-                                            <li data-trigger-name="{!item.triggerName}">{!item}</li>
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.activeTriggers}"
+                                            var="item">
+                                            <li>
+                                                <a href="#" data-trigger-name="{!item}"
+                                                    onclick="{!c.triggerNameClickHandler}">{!item}</a>
+                                            </li>
                                         </aura:iteration>
                                     </div>
                                 </aura:set>
@@ -58,8 +63,12 @@
                                         Triggers per Object.</div>
                                     <ul class="slds-list_dotted">
                                         <div Class="slds-text-heading_medium">
-                                            <aura:iteration items="{!v.selectedObject.triggerDetails.inactiveTriggers}" var="item">
-                                                <li data-trigger-name="{!item.triggerName}">{!item}</li>
+                                            <aura:iteration items="{!v.selectedObject.triggerDetails.inactiveTriggers}"
+                                                var="item">
+                                                <li>
+                                                    <a href="#" data-trigger-name="{!item}"
+                                                        onclick="{!c.triggerNameClickHandler}">{!item}</a>
+                                                </li>
                                             </aura:iteration>
                                         </div>
                                     </ul>
@@ -68,8 +77,12 @@
                             <lightning:accordionSection name="Invalid Triggers" label="Invalid Triggers">
                                 <aura:set attribute="body">
                                     <ul class="slds-list_dotted">
-                                        <aura:iteration items="{!v.selectedObject.triggerDetails.invalidTriggers}" var="item">
-                                            <li data-trigger-name="{!item.triggerName}">{!item}</li>
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.invalidTriggers}"
+                                            var="item">
+                                            <li>
+                                                <a href="#" data-trigger-name="{!item}"
+                                                    onclick="{!c.triggerNameClickHandler}">{!item}</a>
+                                            </li>
                                         </aura:iteration>
                                     </ul>
                                 </aura:set>
@@ -79,8 +92,12 @@
                                     <div class="slds-text-color_destructive">This Section contains list of Deleted
                                         Triggers per Object.</div>
                                     <ul class="slds-list_dotted">
-                                        <aura:iteration items="{!v.selectedObject.triggerDetails.deletedTriggers}" var="item">
-                                            <li data-trigger-name="{!item.triggerName}">{!item}</li>
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.deletedTriggers}"
+                                            var="item">
+                                            <li>
+                                                <a href="#" data-trigger-name="{!item}"
+                                                    onclick="{!c.triggerNameClickHandler}">{!item}</a>
+                                            </li>
                                         </aura:iteration>
                                     </ul>
                                 </aura:set>
@@ -90,8 +107,12 @@
                                     <div class="slds-text-color_destructive">This Section contains list of Triggers that
                                         are part of Managed packages.</div>
                                     <ul class="slds-list_dotted">
-                                        <aura:iteration items="{!v.selectedObject.triggerDetails.managedTriggers}" var="item">
-                                            <li data-trigger-name="{!item.triggerName}">{!item}</li>
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.managedTriggers}"
+                                            var="item">
+                                            <li>
+                                                <a href="#" data-trigger-name="{!item}"
+                                                    onclick="{!c.triggerNameClickHandler}">{!item}</a>
+                                            </li>
                                         </aura:iteration>
                                     </ul>
                                 </aura:set>
@@ -102,14 +123,17 @@
                         <lightning:accordion allowMultipleSectionsOpen="true"
                             onsectiontoggle="{! c.handleSectionToggle }" activeSectionName="{! v.activeSections }">
                             <ul>
-                                <div class="slds-text-color_destructive">This Section Provides Reused events per Object
-                                    .</div>
+                                <div class="slds-text-color_destructive">This Section Provides Reused events per Object.
+                                </div>
                                 <aura:iteration items="{!v.selectedObject.duplicatedEvents}" var="item">
                                     <lightning:accordionSection name="Event" label="{!item.eventName}">
                                         <aura:set attribute="body">
                                             <ul class="slds-list_dotted">
                                                 <aura:iteration items="{!item.triggerName}" var="triggerName">
-                                                    <li data-trigger-name="{!item.triggerName}">{!triggerName}</li>
+                                                    <li>
+                                                        <a href="#" data-trigger-name="{!triggerName}"
+                                                            onclick="{!c.triggerNameClickHandler}">{!triggerName}</a>
+                                                    </li>
                                                 </aura:iteration>
                                             </ul>
                                         </aura:set>
@@ -142,8 +166,8 @@
                                             <div class="slds-truncate" title="{!item.id}">{!item.id}</div>
                                         </td>
                                         <td data-label="Present in Trigger" data-trigger-name="{!item.triggerName}">
-                                            <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}
-                                            </div>
+                                            <a href="#" data-trigger-name="{!item.triggerName}"
+                                                onclick="{!c.triggerNameClickHandler}">{!item.triggerName}</a>
                                         </td>
                                         <td data-label="Line Number">
                                             <div class="slds-truncate" title="{!item.lineNumber}">{!item.lineNumber}
@@ -179,11 +203,12 @@
                                             <div class="slds-truncate" title="{!item.statement}">{!item.statement}</div>
                                         </td>
                                         <td data-label="Type">
-                                            <div class="slds-truncate" title="{!item.statementType}">{!item.statementType}</div>
+                                            <div class="slds-truncate" title="{!item.statementType}">
+                                                {!item.statementType}</div>
                                         </td>
-                                        <td data-label="Present in Trigger" data-trigger-name="{!item.triggerName}">
-                                            <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}
-                                            </div>
+                                        <td data-label="Present in Trigger">
+                                            <a href="#" data-trigger-name="{!item.triggerName}"
+                                                onclick="{!c.triggerNameClickHandler}">{!item.triggerName}</a>
                                         </td>
                                         <td data-label="Line Number">
                                             <div class="slds-truncate" title="{!item.lineNumber}">{!item.lineNumber}
@@ -205,10 +230,12 @@
                                         <div class="slds-truncate" title="Query count">Query Count</div>
                                     </th>
                                     <th class="" scope="col">
-                                        <div class="slds-truncate" title="Query Count With Where Clause">Query Count With Where Clause</div>
+                                        <div class="slds-truncate" title="Query Count With Where Clause">Query Count
+                                            With Where Clause</div>
                                     </th>
                                     <th class="" scope="col">
-                                        <div class="slds-truncate" title="Query Count Without Where Clause">Query Count Without Where Clause</div>
+                                        <div class="slds-truncate" title="Query Count Without Where Clause">Query Count
+                                            Without Where Clause</div>
                                     </th>
                                 </tr>
                             </thead>
@@ -216,18 +243,21 @@
                                 <aura:iteration items="{!v.selectedObject.soqlStatistics}" var="item">
                                     <tr class="slds-hint-parent">
                                         <td data-label="Trigger Name" data-trigger-name="{!item.triggerName}">
-                                            <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}</div>
+                                            <a href="#" data-trigger-name="{!item.triggerName}"
+                                                onclick="{!c.triggerNameClickHandler}">{!item.triggerName}</a>
                                         </td>
                                         <td data-label="Query count">
                                             <div class="slds-truncate" title="{!item.soqlCount}">{!item.soqlCount}
                                             </div>
                                         </td>
                                         <td data-label="Query Count With Where Clause">
-                                            <div class="slds-truncate" title="{!item.soqlWithWhereCount}">{!item.soqlWithWhereCount}
+                                            <div class="slds-truncate" title="{!item.soqlWithWhereCount}">
+                                                {!item.soqlWithWhereCount}
                                             </div>
                                         </td>
                                         <td data-label="Query Count Without Where Clause">
-                                            <div class="slds-truncate" title="{!item.soqlWithoutWhereCount}">{!item.soqlWithoutWhereCount}
+                                            <div class="slds-truncate" title="{!item.soqlWithoutWhereCount}">
+                                                {!item.soqlWithoutWhereCount}
                                             </div>
                                         </td>
                                     </tr>
