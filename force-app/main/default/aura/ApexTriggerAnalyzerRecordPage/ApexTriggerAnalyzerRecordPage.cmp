@@ -46,10 +46,8 @@
                                         This Section indicates active Triggers per Object..
                                     </ui:message>
                                     <div Class="slds-text-body_medium">
-                                        <aura:iteration items="{!v.selectedObject.triggerDetails.activeTriggers}"
-                                            var="item">
-
-                                            <li>{!item}</li>
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.activeTriggers}" var="item">
+                                            <li data-trigger-name="{!item.triggerName}">{!item}</li>
                                         </aura:iteration>
                                     </div>
                                 </aura:set>
@@ -60,9 +58,8 @@
                                         Triggers per Object.</div>
                                     <ul class="slds-list_dotted">
                                         <div Class="slds-text-heading_medium">
-                                            <aura:iteration items="{!v.selectedObject.triggerDetails.inactiveTriggers}"
-                                                var="item">
-                                                <li>{!item}</li>
+                                            <aura:iteration items="{!v.selectedObject.triggerDetails.inactiveTriggers}" var="item">
+                                                <li data-trigger-name="{!item.triggerName}">{!item}</li>
                                             </aura:iteration>
                                         </div>
                                     </ul>
@@ -71,9 +68,8 @@
                             <lightning:accordionSection name="Invalid Triggers" label="Invalid Triggers">
                                 <aura:set attribute="body">
                                     <ul class="slds-list_dotted">
-                                        <aura:iteration items="{!v.selectedObject.triggerDetails.invalidTriggers}"
-                                            var="item">
-                                            <li>{!item}</li>
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.invalidTriggers}" var="item">
+                                            <li data-trigger-name="{!item.triggerName}">{!item}</li>
                                         </aura:iteration>
                                     </ul>
                                 </aura:set>
@@ -83,9 +79,8 @@
                                     <div class="slds-text-color_destructive">This Section contains list of Deleted
                                         Triggers per Object.</div>
                                     <ul class="slds-list_dotted">
-                                        <aura:iteration items="{!v.selectedObject.triggerDetails.deletedTriggers}"
-                                            var="item">
-                                            <li>{!item}</li>
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.deletedTriggers}" var="item">
+                                            <li data-trigger-name="{!item.triggerName}">{!item}</li>
                                         </aura:iteration>
                                     </ul>
                                 </aura:set>
@@ -95,9 +90,8 @@
                                     <div class="slds-text-color_destructive">This Section contains list of Triggers that
                                         are part of Managed packages.</div>
                                     <ul class="slds-list_dotted">
-                                        <aura:iteration items="{!v.selectedObject.triggerDetails.managedTriggers}"
-                                            var="item">
-                                            <li>{!item}</li>
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.managedTriggers}" var="item">
+                                            <li data-trigger-name="{!item.triggerName}">{!item}</li>
                                         </aura:iteration>
                                     </ul>
                                 </aura:set>
@@ -115,7 +109,7 @@
                                         <aura:set attribute="body">
                                             <ul class="slds-list_dotted">
                                                 <aura:iteration items="{!item.triggerName}" var="triggerName">
-                                                    <li>{!triggerName}</li>
+                                                    <li data-trigger-name="{!item.triggerName}">{!triggerName}</li>
                                                 </aura:iteration>
                                             </ul>
                                         </aura:set>
@@ -147,7 +141,7 @@
                                         <td data-label="Hardcoded Id">
                                             <div class="slds-truncate" title="{!item.id}">{!item.id}</div>
                                         </td>
-                                        <td data-label="Present in Trigger">
+                                        <td data-label="Present in Trigger" data-trigger-name="{!item.triggerName}">
                                             <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}
                                             </div>
                                         </td>
@@ -187,7 +181,7 @@
                                         <td data-label="Type">
                                             <div class="slds-truncate" title="{!item.statementType}">{!item.statementType}</div>
                                         </td>
-                                        <td data-label="Present in Trigger">
+                                        <td data-label="Present in Trigger" data-trigger-name="{!item.triggerName}">
                                             <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}
                                             </div>
                                         </td>
@@ -221,7 +215,7 @@
                             <tbody>
                                 <aura:iteration items="{!v.selectedObject.soqlStatistics}" var="item">
                                     <tr class="slds-hint-parent">
-                                        <td data-label="Trigger Name">
+                                        <td data-label="Trigger Name" data-trigger-name="{!item.triggerName}">
                                             <div class="slds-truncate" title="{!item.triggerName}">{!item.triggerName}</div>
                                         </td>
                                         <td data-label="Query count">
