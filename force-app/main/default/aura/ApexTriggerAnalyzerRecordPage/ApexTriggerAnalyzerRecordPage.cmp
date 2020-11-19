@@ -5,6 +5,10 @@
     <!--ATTRIBUTES-->
     <aura:attribute name="triggerAnalyzerReport" type="List" default="[]" />
     <aura:attribute name="selectedObject" type="Map" default="{}" />
+    <aura:attribute name="activeSections" type="List" />
+    <aura:attribute name="activeSectionsMessage" type="String" default="" />
+    <aura:attribute name="isTooltip" type="Boolean" default="false" />
+    <aura:attribute name="recordIdFromVf" type="String" />
 
     <!--HANDLERS-->
     <aura:handler name="init" value="{!this}" action="{!c.init}" />
@@ -12,62 +16,116 @@
     <div class="slds-box slds-theme_default" style="height:70vh">
         <div class="slds-grid slds-gutters">
             <div class="slds-col slds-size_2-of-12">
-                <ul class="slds-has-dividers_bottom-space">
-                    <aura:iteration items="{!v.triggerAnalyzerReport}" var="item">
-                        <li data-value="{!item.objectApiName}" onclick="{!c.objectNameClickHandler}" class="slds-item"
-                            style="cursor:pointer">{!item.objectName}</li>
-                    </aura:iteration>
-                </ul>
+                <ui:scrollerWrapper class="sWrapTest">
+                    <ul class="slds-has-dividers_bottom-space slds-has-block-links_space">
+                        <aura:iteration items="{!v.triggerAnalyzerReport}" var="item">
+                            <li data-value="{!item.objectApiName}" onclick="{!c.objectNameClickHandler}"
+                                class="slds-item" style="cursor:pointer">{!item.objectName}</li>
+                        </aura:iteration>
+                    </ul>
+                </ui:scrollerWrapper>
             </div>
             <div class="slds-col slds-size_10-of-12">
                 <h1 class="slds-page-header__title">Viewing Trigger Details for {!v.selectedObject.objectName} object
                 </h1>
-                <lightning:tabset>
+                <br />
+                <lightning:tabset variant="scoped">
                     <lightning:tab label="Object's Trigger Details">
-                        <div class="slds-text-title_caps">Active Triggers</div>
-                        <ul class="slds-list_dotted">
-                            <aura:iteration items="{!v.selectedObject.triggerDetails.activeTriggers}" var="item">
-                                <li>{!item}</li>
-                            </aura:iteration>
-                        </ul>
-                        <div class="slds-text-title_caps">Inactive Triggers</div>
-                        <ul class="slds-list_dotted">
-                            <aura:iteration items="{!v.selectedObject.triggerDetails.inactiveTriggers}" var="item">
-                                <li>{!item}</li>
-                            </aura:iteration>
-                        </ul>
-                        <div class="slds-text-title_caps">Invalid Triggers</div>
-                        <ul class="slds-list_dotted">
-                            <aura:iteration items="{!v.selectedObject.triggerDetails.invalidTriggers}" var="item">
-                                <li>{!item}</li>
-                            </aura:iteration>
-                        </ul>
-                        <div class="slds-text-title_caps">Deleted Triggers</div>
-                        <ul class="slds-list_dotted">
-                            <aura:iteration items="{!v.selectedObject.triggerDetails.deletedTriggers}" var="item">
-                                <li>{!item}</li>
-                            </aura:iteration>
-                        </ul>
-                        <div class="slds-text-title_caps">Managed Triggers</div>
-                        <ul class="slds-list_dotted">
-                            <aura:iteration items="{!v.selectedObject.triggerDetails.managedTriggers}" var="item">
-                                <li>{!item}</li>
-                            </aura:iteration>
-                        </ul>
+                        <lightning:accordion allowMultipleSectionsOpen="true"
+                            onsectiontoggle="{! c.handleSectionToggle }" activeSectionName="{! v.activeSections }">
+                            <lightning:accordionSection name="Active Triggers" label="Active Triggers">
+
+                                <aura:set attribute="actions">
+                                    <lightning:helptext class="helptext"
+                                        content="This Section indicates active Triggers per Object.." />
+                                </aura:set>
+
+                                <aura:set attribute="body">
+                                    <ui:message title="Information" severity="info" closable="false">
+                                        This Section indicates active Triggers per Object..
+                                    </ui:message>
+                                    <div Class="slds-text-body_medium">
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.activeTriggers}"
+                                            var="item">
+
+                                            <li>{!item}</li>
+                                        </aura:iteration>
+                                    </div>
+                                </aura:set>
+                            </lightning:accordionSection>
+                            <lightning:accordionSection name="Inactive Triggers" label="Inactive Triggers">
+                                <aura:set attribute="body">
+                                    <div class="slds-text-color_destructive">This Section contains list of Inactive
+                                        Triggers per Object.</div>
+                                    <ul class="slds-list_dotted">
+                                        <div Class="slds-text-heading_medium">
+                                            <aura:iteration items="{!v.selectedObject.triggerDetails.inactiveTriggers}"
+                                                var="item">
+                                                <li>{!item}</li>
+                                            </aura:iteration>
+                                        </div>
+                                    </ul>
+                                </aura:set>
+                            </lightning:accordionSection>
+                            <lightning:accordionSection name="Invalid Triggers" label="Invalid Triggers">
+                                <aura:set attribute="body">
+                                    <ul class="slds-list_dotted">
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.invalidTriggers}"
+                                            var="item">
+                                            <li>{!item}</li>
+                                        </aura:iteration>
+                                    </ul>
+                                </aura:set>
+                            </lightning:accordionSection>
+                            <lightning:accordionSection name="Deleted Triggers" label="Deleted Triggers">
+                                <aura:set attribute="body">
+                                    <div class="slds-text-color_destructive">This Section contains list of Deleted
+                                        Triggers per Object.</div>
+                                    <ul class="slds-list_dotted">
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.deletedTriggers}"
+                                            var="item">
+                                            <li>{!item}</li>
+                                        </aura:iteration>
+                                    </ul>
+                                </aura:set>
+                            </lightning:accordionSection>
+                            <lightning:accordionSection name="Managed Triggers" label="Managed Triggers">
+                                <aura:set attribute="body">
+                                    <div class="slds-text-color_destructive">This Section contains list of Triggers that
+                                        are part of Managed packages.</div>
+                                    <ul class="slds-list_dotted">
+                                        <aura:iteration items="{!v.selectedObject.triggerDetails.managedTriggers}"
+                                            var="item">
+                                            <li>{!item}</li>
+                                        </aura:iteration>
+                                    </ul>
+                                </aura:set>
+                            </lightning:accordionSection>
+                        </lightning:accordion>
                     </lightning:tab>
                     <lightning:tab label="Duplicate Events">
-                        <ul>
-                            <aura:iteration items="{!v.selectedObject.duplicatedEvents}" var="item">
-                                <li class="slds-text-title_caps">{!item.eventName}</li>
-                                <ul class="slds-list_dotted">
-                                    <aura:iteration items="{!item.triggerName}" var="triggerName">
-                                        <li>{!triggerName}</li>
-                                    </aura:iteration>
-                                </ul>
-                            </aura:iteration>
-                        </ul>
+                        <lightning:accordion allowMultipleSectionsOpen="true"
+                            onsectiontoggle="{! c.handleSectionToggle }" activeSectionName="{! v.activeSections }">
+                            <ul>
+                                <div class="slds-text-color_destructive">This Section Provides Reused events per Object
+                                    .</div>
+                                <aura:iteration items="{!v.selectedObject.duplicatedEvents}" var="item">
+                                    <lightning:accordionSection name="Event" label="{!item.eventName}">
+                                        <aura:set attribute="body">
+                                            <ul class="slds-list_dotted">
+                                                <aura:iteration items="{!item.triggerName}" var="triggerName">
+                                                    <li>{!triggerName}</li>
+                                                </aura:iteration>
+                                            </ul>
+                                        </aura:set>
+                                    </lightning:accordionSection>
+                                </aura:iteration>
+                            </ul>
+                        </lightning:accordion>
                     </lightning:tab>
                     <lightning:tab label="HardCoded Ids">
+                        <div class="slds-text-color_destructive">This Section provides list of harcoded id's used in
+                            Triggers.</div>
                         <table class="slds-table slds-table_cell-buffer slds-table_bordered">
                             <thead>
                                 <tr class="slds-line-height_reset">

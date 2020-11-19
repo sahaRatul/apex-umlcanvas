@@ -1,6 +1,7 @@
 public with sharing class ApexTriggerAnalyzer {
-    public ApexTriggerAnalyzer() {
-        
+    public string recordId {get;set;}
+    public ApexTriggerAnalyzer(ApexPages.StandardController controller) {
+        recordID = ApexPages.CurrentPage().getparameters().get('id'); 
     }
 
     @AuraEnabled
@@ -24,7 +25,7 @@ public with sharing class ApexTriggerAnalyzer {
     }
     
     @AuraEnabled
-    public static Id analyzeObjectTriggers(List<String> objectNames) {
+    public static Id analyzeObjectTriggers(List<String> objectNames , String trigerReportName) {
         List<ApexTriggerAnalyzerResults> resultList = new List<ApexTriggerAnalyzerResults>();
 
         for(String objectName : objectNames) {
@@ -50,7 +51,7 @@ public with sharing class ApexTriggerAnalyzer {
 
             resultList.add(results);
         }
-        return ApexTriggerAnalyzer.generateReportRecord(resultList);
+        return ApexTriggerAnalyzer.generateReportRecord(resultList , trigerReportName);
     }
     
     private static List<ApexTrigger> getApexTriggerData(String ObjectName) {
@@ -63,8 +64,9 @@ public with sharing class ApexTriggerAnalyzer {
         ];
     }
 
-    private static Id generateReportRecord(List<ApexTriggerAnalyzerResults> results) {
+    private static Id generateReportRecord(List<ApexTriggerAnalyzerResults> results , String trigerReportName) {
         Trigger_Analyzer_Report__c report = new Trigger_Analyzer_Report__c();
+        report.TrigerAnalyser_Report_Name__c = trigerReportName;
         insert report;
 
         String jsonReport = ApexTriggerAnalyzerUtils.getJsonReport(results);
